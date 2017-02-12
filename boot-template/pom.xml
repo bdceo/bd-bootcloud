@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.bdsoft</groupId>
-	<artifactId>bd-</artifactId>
+	<artifactId>boot-template</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>bd-</name>
+	<name>boot-template</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
