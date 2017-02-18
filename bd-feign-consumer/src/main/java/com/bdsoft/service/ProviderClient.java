@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * provider的服务存根，同时指定服务提供者错误处理
  */
-@FeignClient(value = "bd-provider", fallback = ProviderClientHystrix.class)
+@FeignClient(value = "bd-provider",path="/v1/provider", fallback = ProviderClientHystrix.class)
 public interface ProviderClient {
 
-	@RequestMapping(value = "/append2", method = RequestMethod.GET)
+	@RequestMapping(value = "/append", method = RequestMethod.GET)
 	String append(@RequestParam("a") String a, @RequestParam("b") String b);
 
 }
