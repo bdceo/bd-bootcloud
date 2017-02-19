@@ -1,5 +1,7 @@
 package com.bdsoft.web;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,11 @@ public class ProviderController {
 	private DiscoveryClient client;
 
 	@RequestMapping("/append")
-	public String append(String a, String b) {
+	public String append(HttpServletRequest request, String a, String b) {
 
+		String auth = request.getHeader("Authorization");
+		log.info("http-header={}", auth);
+		
 		String res = a + b;
 
 		ServiceInstance instance = client.getLocalServiceInstance();
