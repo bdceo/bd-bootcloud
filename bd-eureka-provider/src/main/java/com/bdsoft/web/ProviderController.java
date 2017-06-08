@@ -1,5 +1,7 @@
 package com.bdsoft.web;
 
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -24,13 +26,18 @@ public class ProviderController {
 
 		String auth = request.getHeader("Authorization");
 		log.info("http-header={}", auth);
-		
+
 		String res = a + b;
 
 		ServiceInstance instance = client.getLocalServiceInstance();
 		log.info("/append, host={}, service_id={}, result={}", instance.getHost(), instance.getServiceId(), res);
 
 		return res;
+	}
+
+	@RequestMapping("/time")
+	public String time() {
+		return new Date().toInstant().toString();
 	}
 
 }

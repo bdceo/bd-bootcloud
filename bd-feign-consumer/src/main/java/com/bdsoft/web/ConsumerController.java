@@ -17,7 +17,11 @@ public class ConsumerController {
 
 	@RequestMapping(value = "/append", method = RequestMethod.GET)
 	public String append(HttpServletRequest request) {
-
 		return client.append("xx", "oo");
+	}
+
+	@RequestMapping(value = "/time", method = RequestMethod.GET)
+	public String time() {
+		return client.time();
 	}
 }

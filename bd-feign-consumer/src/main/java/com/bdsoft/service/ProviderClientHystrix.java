@@ -10,7 +10,12 @@ public class ProviderClientHystrix implements ProviderClient {
 
 	@Override
 	public String append(String a, String b) {
-		return "provider error!";
+		return "provider api: append error!";
+	}
+
+	@Override
+	public String time() {
+		return "provider api: time error!";
 	}
 
 }
