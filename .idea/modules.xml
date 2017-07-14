@@ -11,7 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/bd-ribbon-consumer/bd-ribbon-consumer.iml" filepath="$PROJECT_DIR$/bd-ribbon-consumer/bd-ribbon-consumer.iml" />
       <module fileurl="file://$PROJECT_DIR$/bd-zuul-server/bd-zuul-server.iml" filepath="$PROJECT_DIR$/bd-zuul-server/bd-zuul-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/boot-template/boot-template.iml" filepath="$PROJECT_DIR$/boot-template/boot-template.iml" />
-      <module fileurl="file://$PROJECT_DIR$/bd-boot-war/target/maven-archiver/maven-archiver.iml" filepath="$PROJECT_DIR$/bd-boot-war/target/maven-archiver/maven-archiver.iml" />
+      <module fileurl="file://E:\bdspace\bd-bootcloud\bd-boot-war\target\maven-archiver\maven-archiver.iml" filepath="E:\bdspace\bd-bootcloud\bd-boot-war\target\maven-archiver\maven-archiver.iml" />
     </modules>
   </component>
 </project>
