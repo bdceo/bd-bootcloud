@@ -14,8 +14,4 @@ public class BdBootApplication  {
         SpringApplication.run(BdBootApplication.class, args);
     }
 
-//    @Override
-//    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-//        return application.sources(BdBootApplication.class);
-//    }
 }
