@@ -8,14 +8,14 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan("com.bdsoft.*")
-public class BdBootApplication extends SpringBootServletInitializer {
+public class BdBootApplication  {
 
     public static void main(String[] args) {
         SpringApplication.run(BdBootApplication.class, args);
     }
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(BdBootApplication.class);
-    }
+//    @Override
+//    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+//        return application.sources(BdBootApplication.class);
+//    }
 }
