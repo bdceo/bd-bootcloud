@@ -25,14 +25,14 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="bd-boot-war" target="1.8" />
-      <module name="bd-config-client" target="1.8" />
-      <module name="bd-config-server" target="1.8" />
-      <module name="bd-eureka-provider" target="1.8" />
-      <module name="bd-eureka-server" target="1.8" />
-      <module name="bd-feign-consumer" target="1.8" />
-      <module name="bd-ribbon-consumer" target="1.8" />
-      <module name="bd-zuul-server" target="1.8" />
-      <module name="boot-template" target="1.8" />
+      <module name="bd-config-client" target="1.5" />
+      <module name="bd-config-server" target="1.5" />
+      <module name="bd-eureka-provider" target="1.5" />
+      <module name="bd-eureka-server" target="1.5" />
+      <module name="bd-feign-consumer" target="1.5" />
+      <module name="bd-ribbon-consumer" target="1.5" />
+      <module name="bd-zuul-server" target="1.5" />
+      <module name="boot-template" target="1.5" />
       <module name="maven-archiver" target="1.5" />
     </bytecodeTargetLevel>
   </component>
