@@ -1,8 +1,12 @@
 package com.bdsoft.web;
 
+import com.bdsoft.config.CustomConfig;
+import com.bdsoft.config.InfoConfig;
 import com.bdsoft.entity.BdUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -11,9 +15,23 @@ public class UserController {
 
     private Logger log = LoggerFactory.getLogger(UserController.class);
 
+    @Autowired
+    private InfoConfig infoConfig;
+    @Autowired
+    private CustomConfig customConfig;
+    @Autowired
+    private Environment env;
+
     @GetMapping("/{id}")
     public String getUser(@PathVariable("id") Long id) {
         log.info("get user id={}", id);
+
+        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
+
+        log.info("default-configs:{}", infoConfig);
+
+        log.info("custom-configs:{}", customConfig);
+
         return "hello user#" + id;
     }
 
