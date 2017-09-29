@@ -4,9 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
-import org.springframework.context.annotation.Bean;
-
-import com.bdsoft.feign.FeignRequestInterceptor;
 
 // 用于启用feign客户端，类似rpc方式调用服务提供者
 @EnableFeignClients
@@ -15,12 +12,8 @@ import com.bdsoft.feign.FeignRequestInterceptor;
 @SpringBootApplication
 public class FeignConsumerApplication {
 
-	@Bean
-	public FeignRequestInterceptor basicAuthRequestInterceptor() {
-		return new FeignRequestInterceptor();
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(FeignConsumerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FeignConsumerApplication.class, args);
+    }
 }
+

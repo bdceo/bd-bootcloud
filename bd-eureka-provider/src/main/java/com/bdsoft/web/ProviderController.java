@@ -29,7 +29,7 @@ public class ProviderController {
 
 		String res = a + b;
 
-		ServiceInstance instance = client.getInstances("ok").get(0);
+		ServiceInstance instance = client.getInstances("BD-PROVIDER-1").get(0);
 		log.info("/append, host={}, service_id={}, result={}", instance.getHost(), instance.getServiceId(), res);
 
 		return res;
