@@ -1,8 +1,11 @@
 package com.bdsoft.web;
 
-//import org.apache.logging.log4j.LogManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bdsoft.config.CustomConfig;
+import com.bdsoft.config.InfoConfig;
 import com.bdsoft.entity.BdUser;
+
 
 @RestController
 @RequestMapping("/users")
@@ -21,18 +27,22 @@ public class UserController {
     private Logger slf4j = LoggerFactory.getLogger(UserController.class);
 //    private org.apache.logging.log4j.Logger log4j2 = LogManager.getLogger(UserController.class);
 
+    @Autowired
+    private InfoConfig infoConfig;
+    @Autowired
+    private CustomConfig customConfig;
+    @Autowired
+    private Environment env;
+
     @GetMapping("/{id}")
     public String getUser(@PathVariable("id") Long id) {
-        slf4j.info("get user id={}", id);
-//        log4j2.info("get user id={}", id);
+        log.info("get user id={}", id);
 
-        try {
-            int r = 1 / 0;
-        } catch (Exception e) {
-            slf4j.error("slf4j-error:", e);
-//            log4j2.error("log4j2-error:", e);
-            e.printStackTrace();
-        }
+        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
+
+        log.info("default-configs:{}", infoConfig);
+
+        log.info("custom-configs:{}", customConfig);
 
         return "hello user#" + id;
     }
