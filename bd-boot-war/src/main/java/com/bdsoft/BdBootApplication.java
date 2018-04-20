@@ -1,18 +1,21 @@
 package com.bdsoft;
 
-import com.bdsoft.config.CustomConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-public class BdBootApplication  {
+@ComponentScan("com.bdsoft.*")
+public class BdBootApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BdBootApplication.class, args);
+        // default bootstrap
+//        SpringApplication.run(BdBootApplication.class, args);
+
+        // add special configs for bootstrap
+        SpringApplication app = new SpringApplication(BdBootApplication.class);
+        // TODO config others
+        app.run(args);
     }
 
 }
