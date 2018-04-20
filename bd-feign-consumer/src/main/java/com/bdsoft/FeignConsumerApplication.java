@@ -2,9 +2,12 @@ package com.bdsoft;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 
+// 开启断路器
+@EnableCircuitBreaker
 // 用于启用feign客户端，类似rpc方式调用服务提供者
 @EnableFeignClients
 // 用于发现服务
