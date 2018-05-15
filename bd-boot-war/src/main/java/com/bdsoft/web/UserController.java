@@ -63,13 +63,13 @@ public class UserController {
 
     @GetMapping("/{id}")
     public String getUser(@PathVariable("id") Long id) {
-        log.info("get user id={}", id);
-
-        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
-
-        log.info("default-configs:{}", infoConfig);
-
-        log.info("custom-configs:{}", customConfig);
+//        log.info("get user id={}", id);
+//
+//        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
+//
+//        log.info("default-configs:{}", infoConfig);
+//
+//        log.info("custom-configs:{}", customConfig);
 
         return "hello user#" + id;
     }
