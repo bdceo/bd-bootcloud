@@ -27,8 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/users")
 public class UserController {
 
-    private Logger slf4j = LoggerFactory.getLogger(UserController.class);
-//    private org.apache.logging.log4j.Logger log4j2 = LogManager.getLogger(UserController.class);
+    private Logger log = LoggerFactory.getLogger(UserController.class);
+//    private org.apache.logging.log4j.Logger log = LogManager.getLogger(UserController.class);
 
     @Autowired
     private InfoConfig infoConfig;
@@ -63,32 +63,32 @@ public class UserController {
 
     @GetMapping("/{id}")
     public String getUser(@PathVariable("id") Long id) {
-//        log.info("get user id={}", id);
-//
-//        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
-//
-//        log.info("default-configs:{}", infoConfig);
-//
-//        log.info("custom-configs:{}", customConfig);
+        log.info("get user id={}", id);
+
+        log.info("env-info.app.name={}", env.getProperty("info.app.name"));
+
+        log.info("default-configs:{}", infoConfig);
+
+        log.info("custom-configs:{}", customConfig);
 
         return "hello user#" + id;
     }
 
     @PostMapping("/")
     public String addUser(BdUser user) {
-        slf4j.info("add user, id={}, name={}", user.getId(), user.getName());
+        log.info("add user, id={}, name={}", user.getId(), user.getName());
         return "add user success!";
     }
 
     @PutMapping("/{id}")
     public String updateUser(@PathVariable("id") Long id, @RequestParam String name) {
-        slf4j.info("update user id={}, name={}", id, name);
+        log.info("update user id={}, name={}", id, name);
         return "update user#" + id + " success!";
     }
 
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable("id") Long id) {
-        slf4j.info("delte user id={}", id);
+        log.info("delte user id={}", id);
         return "delete user#" + id + " success!";
     }
 
