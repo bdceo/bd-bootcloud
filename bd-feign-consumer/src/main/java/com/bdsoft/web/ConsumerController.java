@@ -19,7 +19,7 @@ public class ConsumerController {
     @RequestMapping(value = "/append", method = RequestMethod.GET)
     public String append(HttpServletRequest request) {
         RequestContextHolder.currentRequestAttributes();
-        return client.append("xx" + new Random().nextInt(100), "oo" + new Random().nextInt(100));
+        return client.append("hello" + new Random().nextInt(100), "java" + new Random().nextInt(100));
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.GET)

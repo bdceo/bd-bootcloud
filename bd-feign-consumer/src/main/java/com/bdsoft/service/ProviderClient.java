@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(value = "bd-provider-1",path="/v1/provider", fallback = ProviderClientHystrix.class)
 public interface ProviderClient {
 
-	@Headers("Authorization")
+//	@Headers("Authorization")
 	@RequestMapping(value = "/append", method = RequestMethod.GET)
 	String append(@RequestParam("a") String a, @RequestParam("b") String b);
 

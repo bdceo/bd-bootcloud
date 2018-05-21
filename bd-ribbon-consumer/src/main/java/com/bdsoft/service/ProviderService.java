@@ -3,6 +3,9 @@ package com.bdsoft.service;
 import com.bdsoft.web.ConsumerController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.netflix.hystrix.contrib.javanica.cache.annotation.CacheKey;
+import com.netflix.hystrix.contrib.javanica.cache.annotation.CacheRemove;
+import com.netflix.hystrix.contrib.javanica.cache.annotation.CacheResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,25 @@ public class ProviderService {
 
         log.info("Spend time: {}", (System.currentTimeMillis() - start));
         return res;
+    }
+
+
+    @CacheResult(cacheKeyMethod = "showCacheKey") // 开启请求缓存
+    @HystrixCommand(commandKey = "show")
+    public String show(@CacheKey("id") Long id) {
+        return template.getForEntity("http://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
+    }
+
+    // 清除缓存
+    @CacheRemove(commandKey = "show")
+    @HystrixCommand
+    public void rm(@CacheKey("id") Long id) {
+        // TODO delete object
+    }
+
+    // 生成缓存key方法，优先级高于cacheKey
+    public Long showCacheKey(Long id) {
+        return id;
     }
 
     // 服务提供者错误时回调函数
