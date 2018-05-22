@@ -1,6 +1,7 @@
 package com.bdsoft.web;
 
 import java.util.Date;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,7 +23,7 @@ public class ProviderController {
 	private DiscoveryClient client;
 
 	@RequestMapping("/append")
-	public String append(HttpServletRequest request, String a, String b) {
+	public String append(HttpServletRequest request, String a, String b) throws  Exception{
 
 		String auth = request.getHeader("Authorization");
 		log.info("http-header={}", auth);
@@ -31,6 +32,11 @@ public class ProviderController {
 
 		ServiceInstance instance = client.getInstances("BD-PROVIDER-1").get(0);
 		log.info("/append, host={}, service_id={}, result={}", instance.getHost(), instance.getServiceId(), res);
+
+		// 模拟响应慢
+		int sleep = new Random().nextInt(3000);
+		log.info("sleepTime:{}",sleep);
+		Thread.sleep(sleep);
 
 		return res;
 	}
