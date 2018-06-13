@@ -1,14 +1,37 @@
 package com.bdsoft;
 
+import com.bdsoft.utils.BDExcelParser;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SpringBootApplication
 public class BdAutoconfigApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BdAutoconfigApplication.class, args);
+    private static Logger log = LoggerFactory.getLogger(BdAutoconfigApplication.class);
+
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
     }
+
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(BdAutoconfigApplication.class, args);
+
+
+    }
+
 
 
     /**

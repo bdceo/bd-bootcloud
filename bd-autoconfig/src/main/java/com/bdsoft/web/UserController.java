@@ -1,7 +1,9 @@
 package com.bdsoft.web;
 
-/**
- * Created by bdceo on 2018/2/9.
- */
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
 public class UserController {
+
+
 }
