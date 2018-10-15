@@ -14,6 +14,8 @@ public class CustomConfig {
     private String name;
     private String address;
 
+    private String nickName;
+
     @Value("${bd.table.id}")
     private String tableId;
 
@@ -23,8 +25,17 @@ public class CustomConfig {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
+                ", nickName='" + nickName + '\'' +
                 ", tableId='" + tableId + '\'' +
                 '}';
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public Integer getId() {
