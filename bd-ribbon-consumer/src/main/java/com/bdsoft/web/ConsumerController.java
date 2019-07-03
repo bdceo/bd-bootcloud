@@ -24,7 +24,7 @@ public class ConsumerController {
 
     @RequestMapping(value = "/append1", method = RequestMethod.GET)
     public String appendByTemplate() {
-        return template.getForEntity("http://" + PROVIDER_SERVICE_ID + "/v1/provider/append?a=from&b=To", String.class).getBody();
+        return template.getForEntity("unirest://" + PROVIDER_SERVICE_ID + "/v1/provider/append?a=from&b=To", String.class).getBody();
     }
 
     @RequestMapping(value = "/append2", method = RequestMethod.GET)

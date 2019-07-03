@@ -25,7 +25,7 @@ public class ProviderController {
     @RequestMapping("/append")
     public String append(HttpServletRequest request, String a, String b) throws Exception {
         String auth = request.getHeader("Authorization");
-        log.info("http-header={}", auth);
+        log.info("unirest-header={}", auth);
 
         String res = a + b;
 

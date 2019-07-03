@@ -32,7 +32,7 @@ public class ProviderService {
     public String append() {
         Long start = System.currentTimeMillis();
 
-        String res = template.getForEntity("http://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
+        String res = template.getForEntity("unirest://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
 
         log.info("Spend time: {}", (System.currentTimeMillis() - start));
         return res;
@@ -42,7 +42,7 @@ public class ProviderService {
     @CacheResult(cacheKeyMethod = "showCacheKey") // 开启请求缓存
     @HystrixCommand(commandKey = "show")
     public String show(@CacheKey("id") Long id) {
-        return template.getForEntity("http://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
+        return template.getForEntity("unirest://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
     }
 
     // 清除缓存

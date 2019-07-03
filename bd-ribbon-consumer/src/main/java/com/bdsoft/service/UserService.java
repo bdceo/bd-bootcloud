@@ -26,12 +26,12 @@ public class UserService {
 
     // 单个查询
     public User find(Long id) {
-        return rest.getForObject("http://User-Service/users/{1}", User.class, id);
+        return rest.getForObject("unirest://User-Service/users/{1}", User.class, id);
     }
 
     // 批量查询
     public List<User> findAll(List<Long> ids) {
-        return rest.getForObject("http://user-service/users?ids={1}", List.class, StringUtils.join(ids, ","));
+        return rest.getForObject("unirest://user-service/users?ids={1}", List.class, StringUtils.join(ids, ","));
     }
 
     // 注解方式
@@ -39,12 +39,12 @@ public class UserService {
             @HystrixProperty(name = "timerDelayInMilliseconds", value = "1000")
     })
     public User find2(Long id) {
-        return rest.getForObject("http://User-Service/users/{1}", User.class, id);
+        return rest.getForObject("unirest://User-Service/users/{1}", User.class, id);
     }
 
     @HystrixCommand
     public List<User> findAll2(List<Long> ids) {
-        return rest.getForObject("http://user-service/users?ids={1}", List.class, StringUtils.join(ids, ","));
+        return rest.getForObject("unirest://user-service/users?ids={1}", List.class, StringUtils.join(ids, ","));
     }
 
 

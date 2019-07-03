@@ -80,7 +80,7 @@ public class ActivityStatFromDb {
     }
 
     public Integer getUser(String phone) {
-        String api = "http://www.huashenghaoche.com/personalcenter/user/userInfoByPhone?phone={1}&type={2}";
+        String api = "unirest://www.huashenghaoche.com/personalcenter/user/userInfoByPhone?phone={1}&type={2}";
         ResponseEntity<String> data = rest.getForEntity(api, String.class, phone, "app");
         JSONObject json = JSONObject.parseObject(data.getBody());
         log.info("手机号：{}， 查询结果：{}", phone, data.getBody());

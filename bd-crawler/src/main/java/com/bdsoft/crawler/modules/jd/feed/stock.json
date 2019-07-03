@@ -1,0 +1,92 @@
+{
+  "stock": {
+    "isWalMar": false,
+    "isJDexpress": "0",
+    "isPlus": false,
+    "cla": [],
+    "channel": 1,
+    "PopType": 0,
+    "dcashDesc": "店铺单笔订单不满99元，收运费10元 <a title=\"了解配送费收取标准\" href=\"//help.jd.com/user/issue/109-188.html\" target=\"_blank\"><i class=\"sprite-question\"></i></a>",
+    "freshEdi": null,
+    "isSam": false,
+    "area": {},
+    "nationallySetWare": null,
+    "weightValue": null,
+    "ab": "-1",
+    "sr": null,
+    "pr": {
+      "promiseResult": "100010",
+      "resultCode": -55
+    },
+    "ac": "-1",
+    "yjhxMap": [],
+    "realSkuId": 25118865051,
+    "promiseResult": "",
+    "ec": "-1",
+    "eir": [],
+    "StockState": 33,
+    "af": "-1",
+    "v": "0",
+    "promiseYX": {
+      "helpLink": "http://help.jd.com/user/issue/289-3781.html",
+      "showName": "不支持7天无理由退货",
+      "iconType": 0,
+      "resultCode": 1,
+      "iconTip": "不支持7天无理由退货",
+      "iconSrc": "不支持7天无理由退货",
+      "picUrl": "\\",
+      "iconCode": "service_noreturn"
+    },
+    "IsPurchase": false,
+    "promiseMark": "不支持7天无理由退货",
+    "ag": "-1",
+    "dcId": "-1",
+    "ae": "-1",
+    "ArrivalDate": "",
+    "ir": [
+      {
+        "helpLink": "http://help.jd.com/user/issue/290-3778.html",
+        "showName": "优鲜赔",
+        "iconType": 0,
+        "resultCode": 1,
+        "iconTip": "当购买生鲜商品后，若发生质量问题，100分钟内快速为您处理",
+        "iconSrc": "优鲜赔",
+        "picUrl": "http://img12.360buyimg.com/cms/jfs/t18562/41/2405289517/1312/44707c/5af400c0N6b9547f3.png",
+        "iconCode": "service_youxianpei"
+      }
+    ],
+    "vd": null,
+    "Dc": [
+      {
+        "ordermin": 99,
+        "dcash": 10,
+        "dtype": 1,
+        "freihtType": 1
+      }
+    ],
+    "afsCode": 1,
+    "Dti": null,
+    "venderType": "0",
+    "m": "0",
+    "code": 1,
+    "isSopUseSelfStock": "0",
+    "sid": "-1",
+    "rn": -1,
+    "sidDely": "-1",
+    "rfg": 0,
+    "support": [],
+    "StockStateName": "现货",
+    "ad": "-1",
+    "Ext": "thwa:0,tsfw:f,storeProperty:3,fare:975645,is7ToReturn:0,GoodsType:1",
+    "skuState": 1,
+    "stockDesc": "<strong>有货</strong>",
+    "jdPrice": {
+      "op": "110.00",
+      "m": "138.60",
+      "id": "25118865051",
+      "p": "110.00"
+    },
+    "rid": null
+  },
+  "choseSuit": []
+}

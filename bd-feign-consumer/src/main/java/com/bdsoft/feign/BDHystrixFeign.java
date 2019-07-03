@@ -56,7 +56,7 @@ public class BDHystrixFeign {
          * Like {@link Feign#newInstance(Target)}, except with {@link HystrixCommand#getFallback()
          * fallback} support.
          *
-         * <p>Fallbacks are known values, which you return when there's an error invoking an http
+         * <p>Fallbacks are known values, which you return when there's an error invoking an unirest
          * method. For example, you can return a cached result as opposed to raising an error to the
          * caller. To use this feature, pass a safe implementation of your target interface as the last
          * parameter.

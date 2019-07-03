@@ -41,7 +41,7 @@ public class ProviderCommand extends HystrixCommand<String> {
 
     @Override
     protected String run() throws Exception {
-        String res = template.getForEntity("http://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
+        String res = template.getForEntity("unirest://" + ConsumerController.PROVIDER_SERVICE_ID + "/v1/provider/append?a=To&b=From", String.class).getBody();
         return res;
     }
 }
