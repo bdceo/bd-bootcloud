@@ -5,7 +5,7 @@ import com.bdsoft.crawler.modules.jd.entity.JdSku;
 /**
  * Created by Administrator on 2019/7/3.
  */
-public class JdFetchSku {
+public class FetchSku {
 
     public JdSku fetch(String url) {
 

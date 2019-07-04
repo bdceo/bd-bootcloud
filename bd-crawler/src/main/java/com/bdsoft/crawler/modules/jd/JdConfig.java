@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 配置+工具
+ * 京东：配置+工具
  */
 public class JdConfig {
 

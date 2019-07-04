@@ -32,14 +32,7 @@ import java.text.MessageFormat;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class JsoupTest {
-
-    // 全局配置
-    static {
-        Unirest.config().connectTimeout(3_000).socketTimeout(5_000)
-                .setDefaultHeader("Accept-Encoding", "gzip")
-                .setDefaultHeader("User-Agent", CommonConfig.USER_AGENT);
-    }
+public class FetchJdTest extends SuperTest {
 
     /**
      * 从网络获取
