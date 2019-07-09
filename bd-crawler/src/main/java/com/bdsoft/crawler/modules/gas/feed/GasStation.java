@@ -10,22 +10,21 @@ public class GasStation {
 
     private String name;
 
-    private String province;
-    private String city;
-    private String district;
+    private String provinceCode;
+    private String cityCode;
+    private String districtCode;
 
     private String address;
 
     private String phone;
 
-
     @Override
     public String toString() {
         return "GasStation{" +
                 "name='" + name + '\'' +
-                ", province='" + province + '\'' +
-                ", city='" + city + '\'' +
-                ", district='" + district + '\'' +
+                ", provinceCode='" + provinceCode + '\'' +
+                ", cityCode='" + cityCode + '\'' +
+                ", districtCode='" + districtCode + '\'' +
                 ", address='" + address + '\'' +
                 ", phone='" + phone + '\'' +
                 '}';

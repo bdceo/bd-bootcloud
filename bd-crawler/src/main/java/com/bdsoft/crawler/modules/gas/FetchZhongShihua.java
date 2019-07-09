@@ -1,7 +1,9 @@
 package com.bdsoft.crawler.modules.gas;
 
 import com.bdsoft.crawler.common.Utils;
+import com.bdsoft.crawler.modules.gas.entity.StationDb;
 import com.bdsoft.crawler.modules.gas.feed.GasStation;
+import com.bdsoft.crawler.modules.gas.mapper.StationDbMapper;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
@@ -9,28 +11,47 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * 中石化
  */
 @Slf4j
+@Component
 public class FetchZhongShihua {
 
+    @Autowired
+    private StationDbMapper stationDbMapper;
 
     /**
      * 抓取中石化官网-加油站列表
      */
     public void fetch() {
+        Date now = new Date();
+
         // 加载省份列表
         List<String> provinceList = this.getProvinceList();
 
         // 遍历加载省份-加油站列表
         for (String provinceId : provinceList) {
-            this.getStationList(provinceId);
+            List<GasStation> stationList = this.getStationList(provinceId);
+
+            for (GasStation station : stationList) {
+                StationDb tmp = new StationDb();
+                BeanUtils.copyProperties(station, tmp);
+                tmp.setType(1); // 中石化
+                tmp.setSource("https://www.sinopecsales.com/");
+                tmp.setCreateTime(now);
+
+                stationDbMapper.insert(tmp);
+            }
         }
     }
 
@@ -66,7 +87,7 @@ public class FetchZhongShihua {
                     station.setName(cells.get(1).text());
                     station.setAddress(cells.get(2).text());
                     station.setPhone(cells.get(4).text());
-                    station.setProvince(provinceId);
+                    station.setProvinceCode(provinceId + "0000");
                     stationList.add(station);
                     log.info("站点：{}", station.toString());
                 }
@@ -96,12 +117,18 @@ public class FetchZhongShihua {
         int pageNo = 1;
         int stationCharge = 2;
         String url = MessageFormat.format(GasConfig.ZHSHH_STATIONS, provinceId, pageNo, stationCharge);
+        log.info("load total-page url={}", url);
 
         // 从第一页获取总页数
         HttpResponse<String> res = Unirest.post(url).asString();
         if (res.isSuccess()) {
             Document html = Jsoup.parse(res.getBody());
             Element ele = html.select("body a").last();
+            // 西藏，默认返回1页
+            if (ele == null && provinceId.equals("54")) {
+                log.info("没发现尾页链接，默认返回1页");
+                return 1;
+            }
             return Utils.getNumber(ele.attr("onclick"));
         }
 
