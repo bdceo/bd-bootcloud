@@ -2,7 +2,6 @@ package com.bdsoft.crawler;
 
 import com.bdsoft.crawler.common.BDFileUtil;
 import com.bdsoft.crawler.common.WebUtils;
-import com.bdsoft.crawler.common.unirest.CommonConfig;
 import com.bdsoft.crawler.modules.jd.JdConfig;
 import com.bdsoft.crawler.modules.jd.feed.JdCommentState;
 import com.bdsoft.crawler.modules.jd.feed.JdPrice;
@@ -20,8 +19,6 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.MessageFormat;
 
 /**
@@ -55,28 +52,13 @@ public class FetchJdTest extends SuperTest {
         }
     }
 
-    /**
-     * 从本地获取
-     *
-     * @param file 缓存路径
-     * @return
-     */
-    private Document getDocumentFromLocal(String file) {
-        try {
-            return Jsoup.parse(new File(file), "utf-8");
-        } catch (IOException e) {
-            log.error("local file not exists {}", file);
-            return null;
-        }
-    }
-
     @Test
     public void testFetchJdSku() throws Exception {
         String url = "https://item.jd.com/25118865051.html";
         String file = "d:/download/jd/25118865051.txt";
 
 //        Document html = this.getDocumentFromWeb(url);
-        Document html = this.getDocumentFromLocal(file);
+        Document html = this.getFromLocal(file);
 
         // 商品名称
         Element ele = html.selectFirst("div.sku-name");
