@@ -12,7 +12,6 @@ import org.jsoup.nodes.Document;
 import java.io.File;
 import java.io.IOException;
 
-
 @Slf4j
 public class SuperTest {
 

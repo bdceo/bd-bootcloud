@@ -3,7 +3,7 @@ package com.bdsoft.crawler.fetcher;
 import org.jsoup.nodes.Document;
 
 /**
- * Created by Administrator on 2019/6/27.
+ * 抓取器
  */
 public interface IBDFetcher<E, Q> {
 
