@@ -9,4 +9,6 @@ public class FundConfig {
     public static String JJCC = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code={0}&topline={1}";
 
 
+
+
 }

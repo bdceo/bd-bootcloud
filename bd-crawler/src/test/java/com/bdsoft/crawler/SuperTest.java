@@ -71,6 +71,7 @@ public class SuperTest {
 
         if (res.isSuccess()) {
             // 缓存本地
+            new File(file.substring(0, file.lastIndexOf("/"))).mkdirs();
             BDFileUtil.writeFile(file, res.getBody(), true);
             log.info("fetch suc url={}", url);
             return res.getBody();
