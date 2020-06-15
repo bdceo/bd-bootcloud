@@ -3,7 +3,7 @@ package com.bdsoft.crawler.modules.weibo;
 import java.io.File;
 
 /**
- * Created by Administrator on 2019/7/17.
+ * 微博抓取配置
  */
 public class WeiboConfig {
 
@@ -27,5 +27,7 @@ public class WeiboConfig {
         File[] files = new File(CACHE_PATH).listFiles((n) -> n.getName().startsWith("cookie"));
         return files.length > 0;
     }
+
+
 
 }
