@@ -1,0 +1,33 @@
+{
+    "rc": 0,
+    "rt": 13,
+    "svr": 182993545,
+    "lt": 1,
+    "full": 0,
+    "data": {
+        "hk2sh": {
+            "status": 3,
+            "dayNetAmtIn": 281186.73,
+            "dayAmtRemain": 4918813.27,
+            "dayAmtThreshold": 5200000
+        },
+        "sh2hk": {
+            "status": 3,
+            "dayNetAmtIn": 168650.99,
+            "dayAmtRemain": 4031349.01,
+            "dayAmtThreshold": 4200000
+        },
+        "hk2sz": {
+            "status": 3,
+            "dayNetAmtIn": 271535.9,
+            "dayAmtRemain": 4928464.1,
+            "dayAmtThreshold": 5200000
+        },
+        "sz2hk": {
+            "status": 3,
+            "dayNetAmtIn": 128639.47,
+            "dayAmtRemain": 4071360.53,
+            "dayAmtThreshold": 4200000
+        }
+    }
+}
