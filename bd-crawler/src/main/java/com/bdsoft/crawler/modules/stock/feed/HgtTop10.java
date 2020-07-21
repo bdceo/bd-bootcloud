@@ -15,23 +15,23 @@ public class HgtTop10 extends HSgtTopBase {
      * 沪股通买入金额
      */
     @JSONField(name = "HGTMRJE")
-    private BigDecimal hgtIn;
+    private BigDecimal inAmount;
 
     /**
      * 沪股通卖出金额
      */
     @JSONField(name = "HGTMCJE")
-    private BigDecimal hgtOut;
+    private BigDecimal outAmount;
 
     /**
      * 沪股通净买额 = 沪股通买入金额 - 沪股通卖出金额
      */
     @JSONField(name = "HGTJME")
-    private BigDecimal hgtReal;
+    private BigDecimal realAmount;
 
     /**
      * 沪股通成交金额
      */
     @JSONField(name = "HGTCJJE")
-    private BigDecimal hgtDeal;
+    private BigDecimal dealAmount;
 }

@@ -17,7 +17,7 @@ public class HSgtTopBase {
     private int marketType;
 
     @JSONField(name = "DetailDate")
-    private String day;
+    private String today;
 
     private String rank;
     private String rank1;
@@ -31,8 +31,8 @@ public class HSgtTopBase {
     @JSONField(name = "Close")
     private BigDecimal close;
 
-    @JSONField(name = "ChangePercent")
     private BigDecimal changePercent;
+    @JSONField(name = "ChangePercent")
 
     public int getRank() {
         if (StringUtils.isNotEmpty(rank) && NumberUtils.isNumber(rank)) {

@@ -73,7 +73,7 @@ public class FetchStockTest extends SuperTest {
             str.append("排名：").append(item.getRank()).append("\t代码：").append(item.getCode());
             str.append("\t名称：").append(item.getName()).append("\t收盘：").append(item.getClose());
             str.append("\t涨跌：").append(item.getChangePercent().setScale(2, BigDecimal.ROUND_HALF_UP)).append("%");
-            str.append("\t买入：").append(item.getHgtIn()).append("\t卖出：").append(item.getHgtOut()).append("\t成交额：").append(item.getHgtDeal());
+            str.append("\t买入：").append(item.getInAmount()).append("\t卖出：").append(item.getOutAmount()).append("\t成交额：").append(item.getDealAmount());
             log.info(str.toString());
         }
 
@@ -88,7 +88,7 @@ public class FetchStockTest extends SuperTest {
             str.append("排名：").append(item.getRank()).append("\t代码：").append(item.getCode());
             str.append("\t名称：").append(item.getName()).append("\t收盘：").append(item.getClose());
             str.append("\t涨跌：").append(item.getChangePercent().setScale(2, BigDecimal.ROUND_HALF_UP)).append("%");
-            str.append("\t买入：").append(item.getSgtIn()).append("\t卖出：").append(item.getSgtOut()).append("\t成交额：").append(item.getSgtReal());
+            str.append("\t买入：").append(item.getInAmount()).append("\t卖出：").append(item.getOutAmount()).append("\t成交额：").append(item.getRealAmount());
             log.info(str.toString());
         }
 
@@ -103,7 +103,7 @@ public class FetchStockTest extends SuperTest {
             str.append("排名：").append(item.getRank()).append("\t代码：").append(item.getCode());
             str.append("\t名称：").append(item.getName()).append("\t收盘：").append(item.getClose());
             str.append("\t涨跌：").append(item.getChangePercent().setScale(2, BigDecimal.ROUND_HALF_UP)).append("%");
-            str.append("\t买入：").append(item.getGgtHIn()).append("\t卖出：").append(item.getGgtHOut()).append("\t成交额：").append(item.getGgtHDeal());
+            str.append("\t买入：").append(item.getInAmount()).append("\t卖出：").append(item.getOutAmount()).append("\t成交额：").append(item.getDealAmount());
             log.info(str.toString());
         }
 
@@ -118,7 +118,7 @@ public class FetchStockTest extends SuperTest {
             str.append("排名：").append(item.getRank()).append("\t代码：").append(item.getCode());
             str.append("\t名称：").append(item.getName()).append("\t收盘：").append(item.getClose());
             str.append("\t涨跌：").append(item.getChangePercent().setScale(2, BigDecimal.ROUND_HALF_UP)).append("%");
-            str.append("\t买入：").append(item.getGgtSIn()).append("\t卖出：").append(item.getGgtSOut()).append("\t成交额：").append(item.getGgtSReal());
+            str.append("\t买入：").append(item.getInAmount()).append("\t卖出：").append(item.getOutAmount()).append("\t成交额：").append(item.getRealAmount());
             log.info(str.toString());
         }
     }

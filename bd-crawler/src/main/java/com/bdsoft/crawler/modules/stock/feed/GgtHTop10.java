@@ -15,21 +15,21 @@ public class GgtHTop10 extends HSgtTopBase {
      * 港股通-沪-买入
      */
     @JSONField(name = "GGTHMRJE")
-    private BigDecimal ggtHIn;
+    private BigDecimal inAmount;
     /**
      * 港股通-沪-卖出
      */
     @JSONField(name = "GGTHMCJE")
-    private BigDecimal ggtHOut;
+    private BigDecimal outAmount;
     /**
      * 港股通-沪-净买额 = 买入 - 卖出
      */
     @JSONField(name = "GGTHJME")
-    private BigDecimal ggtHReal;
+    private BigDecimal realAmount;
     /**
      * 港股通-沪-成交额
      */
     @JSONField(name = "GGTHCJJE")
-    private BigDecimal ggtHDeal;
+    private BigDecimal dealAmount;
 
 }
