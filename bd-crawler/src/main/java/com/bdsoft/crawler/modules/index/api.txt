@@ -1,0 +1,20 @@
+
+数据来源：中证指数官网 http://www.csindex.com.cn/zh-CN
+
+
+搜索入口：http://www.csindex.com.cn/zh-CN/indices/index?class_1=1&class_17=17&class_10=10&class_7=7&is_custom_0=1
+
+        指数系列：中证系列，上证系列，深证系列
+
+        资产类别：股票，债券，基金，期货
+
+        指数分类：综合，规模，行业，风格，主题，策略
+
+        地区覆盖：境内，境外
+
+        指数币种：人民币，港元，美元
+
+        是否定制：是、非
+
+
+指数详情：http://www.csindex.com.cn/zh-CN/indices/index-detail/000001

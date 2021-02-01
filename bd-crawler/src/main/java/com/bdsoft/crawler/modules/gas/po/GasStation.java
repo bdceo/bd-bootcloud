@@ -1,4 +1,4 @@
-package com.bdsoft.crawler.modules.gas.feed;
+package com.bdsoft.crawler.modules.gas.po;
 
 import lombok.Data;
 

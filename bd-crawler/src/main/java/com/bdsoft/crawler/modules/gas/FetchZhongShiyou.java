@@ -1,7 +1,7 @@
 package com.bdsoft.crawler.modules.gas;
 
 import com.bdsoft.crawler.modules.gas.entity.StationDb;
-import com.bdsoft.crawler.modules.gas.feed.GasStation;
+import com.bdsoft.crawler.modules.gas.po.GasStation;
 import com.bdsoft.crawler.modules.gas.mapper.StationDbMapper;
 import com.hshc.basetools.json.JSONUtil;
 import com.hshc.conform.poi.reader.CellMappings;

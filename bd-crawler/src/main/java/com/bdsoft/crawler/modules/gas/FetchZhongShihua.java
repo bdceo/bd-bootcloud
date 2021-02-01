@@ -2,7 +2,7 @@ package com.bdsoft.crawler.modules.gas;
 
 import com.bdsoft.crawler.common.Utils;
 import com.bdsoft.crawler.modules.gas.entity.StationDb;
-import com.bdsoft.crawler.modules.gas.feed.GasStation;
+import com.bdsoft.crawler.modules.gas.po.GasStation;
 import com.bdsoft.crawler.modules.gas.mapper.StationDbMapper;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;

@@ -1,0 +1,36 @@
+{
+  "total": 1863,
+  "page_size": "100",
+  "total_page": 20,
+  "list": [
+    {
+      "index_id": 1,
+      "index_code": "000001",
+      "indx_sname": "上证指数",
+      "index_ename": "SSE Index",
+      "num": "1541",
+      "tclose": "3483.07",
+      "yld_1_mon": "3.08",
+      "base_point": "100.00",
+      "base_date": "1990-12-19 00:00:00",
+      "online_date": "1991-07-15",
+      "is_custom": 0,
+      "is_show": 1,
+      "index_c_intro": "<p><p><font>上证综合指数由在上海证券交易所上市的符合条件的股票与存托凭证组成样本，反映上海证券交易所上市公司的整体表现。</font></p></p>",
+      "index_e_intro": "<p><p>SSE Composite Index consists of all eligible stocks and CDRs listed on Shanghai Stock Exchange. This index aims to reflect to overall market performance of companies listed on Shanghai Stock Exchange.</p></p>",
+      "index_c_fullname": "上证综合指数",
+      "index_e_fullname": "SSE Composite Index",
+      "class_series": "上证系列指数",
+      "class_eseries": "SSE Indices",
+      "class_region": "境内",
+      "class_eregion": "China Mainland",
+      "class_assets": "股票",
+      "class_eassets": "Equity",
+      "class_classify": "规模",
+      "class_eclassify": "Size",
+      "class_currency": "人民币",
+      "class_ecurrency": "CNY",
+      "class_hot": "",
+      "class_ehot": null
+    }]
+}

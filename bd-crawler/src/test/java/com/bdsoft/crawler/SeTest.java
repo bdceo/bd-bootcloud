@@ -1,16 +1,9 @@
 package com.bdsoft.crawler;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
-
-import java.net.URL;
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
- * Created by Administrator on 2019/7/3.
+ * se测试
  */
 public class SeTest {
 

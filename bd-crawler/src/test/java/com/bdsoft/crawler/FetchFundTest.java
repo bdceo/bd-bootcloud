@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.lang.model.util.Elements;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -64,9 +63,6 @@ public class FetchFundTest extends SuperTest {
              String fundRate = tr.children().get(6).text();
             log.info("股票代码{}\t{}\t{}", stockNo, stockName, fundRate);
         }
-
-
-        System.out.println();
 
     }
 
