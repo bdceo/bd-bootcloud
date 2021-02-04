@@ -1,0 +1,31 @@
+{
+  "Data": {
+    "LSJZList": [
+      {
+        "FSRQ": "2021-01-06",
+        "DWJZ": "3.0789",
+        "LJJZ": "3.0789",
+        "SDATE": null,
+        "ACTUALSYI": "",
+        "NAVTYPE": "1",
+        "JZZZL": "0.85",
+        "SGZT": "开放申购",
+        "SHZT": "开放赎回",
+        "FHFCZ": "",
+        "FHFCBZ": "",
+        "DTYPE": null,
+        "FHSP": ""
+      }
+    ],
+    "FundType": "001",
+    "SYType": null,
+    "isNewType": false,
+    "Feature": "080"
+  },
+  "ErrCode": 0,
+  "ErrMsg": null,
+  "TotalCount": 666,
+  "Expansion": null,
+  "PageSize": 20,
+  "PageIndex": 2
+}
