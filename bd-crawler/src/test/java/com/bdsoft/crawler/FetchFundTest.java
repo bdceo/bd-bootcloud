@@ -9,6 +9,9 @@ import com.bdsoft.crawler.modules.fund.mapper.FundValueMapper;
 import com.bdsoft.crawler.modules.fund.po.FundFeePO;
 import com.bdsoft.crawler.modules.fund.po.FundJzhPO;
 import com.bdsoft.crawler.modules.fund.po.FundPO;
+import com.bdsoft.crawler.modules.fund.xhr.JzhData;
+import com.bdsoft.crawler.modules.fund.xhr.JzhItem;
+import com.bdsoft.crawler.modules.fund.xhr.JzhResponse;
 import com.hshc.basetools.json.JSONUtil;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -20,6 +23,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -164,28 +168,42 @@ public class FetchFundTest extends SuperTest {
     public void testJzh() {
         log.info("测试：历史净值");
 
-        String code = "006341";
+        String code = "00596";
 
         int pageIndex = 1;
         int pageTotal = 1;
         Random random = new Random(System.currentTimeMillis());
         Unirest.config().addDefaultHeader("Referer", FundConfig.HOST_INFO);
+        Unirest.config().addDefaultHeader("Host", FundConfig.HOST_API);
 
         List<FundJzhPO> jzhList = new ArrayList<>();
-        for (int i = pageIndex; i <= pageTotal; i++) {
+        for (; pageIndex <= pageTotal; pageIndex++) {
             // 分页抓取
             String url = MessageFormat.format(FundConfig.FUND_JZ_XHR, random.nextLong(), code, pageIndex, System.currentTimeMillis());
             HttpResponse<String> res = Unirest.get(url).asString();
             if (res.isSuccess()) {
-                log.info("res={}", res);
                 String json = FundConfig.pickXhrData(res.getBody());
-                log.info("json={}", json);
+                JzhResponse resObj = JSONObject.parseObject(json, JzhResponse.class);
+                if (resObj.isSuccess()) {
+                    // 计算总页数
+                    pageTotal = resObj.getPageTotal();
 
+                    JzhData resData = resObj.getData();
+                    if (!CollectionUtils.isEmpty(resData.getList())) {
+                        for (JzhItem item : resData.getList()) {
+                            FundJzhPO jzh = new FundJzhPO(code, item);
+                            log.info("净值：{}", JSONUtil.json(jzh));
+                            jzhList.add(jzh);
+                        }
+                    }
+                } else {
+                    log.error("抓取结果异常：{}, {}, {}", code, pageIndex, resObj.getMsg());
+                    continue;
+                }
             } else {
                 log.error("分页抓取失败：{}, {}", code, pageIndex);
             }
         }
-
     }
 
 }

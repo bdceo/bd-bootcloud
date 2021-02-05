@@ -1,5 +1,6 @@
 package com.bdsoft.crawler.modules.fund.po;
 
+import com.bdsoft.crawler.modules.fund.xhr.JzhItem;
 import lombok.Data;
 
 import java.util.Date;
@@ -34,5 +35,13 @@ public class FundJzhPO {
      * 日涨幅
      */
     private float dayGrowth;
+
+    public FundJzhPO(String code, JzhItem item) {
+        this.code = code;
+        this.dt = item.getDt();
+        this.unitVal = item.getDwjz();
+        this.totalVal = item.getLjjz();
+        this.dayGrowth = item.getJjzzl();
+    }
 
 }

@@ -13,6 +13,7 @@ public class FundConfig {
     // 官网地址
     public static final String HOST = "http://fund.eastmoney.com/";
     public static final String HOST_INFO = "http://fundf10.eastmoney.com/";
+    public static final String HOST_API = "api.fund.eastmoney.com";
 
     // 基金持仓方案：0-基金编号，1-方案个数
     public static String JJCC = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code={0}&topline={1}";
@@ -70,7 +71,7 @@ public class FundConfig {
      */
     public static String pickXhrData(String xhrRes) {
         if (xhrRes.startsWith("jQuery")) {
-            return xhrRes.substring(xhrRes.indexOf("("), xhrRes.length() - 1);
+            return xhrRes.substring(xhrRes.indexOf("(") + 1, xhrRes.length() - 1);
         }
         return null;
     }
