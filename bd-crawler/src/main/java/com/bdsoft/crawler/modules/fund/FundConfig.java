@@ -2,6 +2,7 @@ package com.bdsoft.crawler.modules.fund;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,13 +11,14 @@ import java.util.regex.Pattern;
  */
 public class FundConfig {
 
+    // 随机
+    public static final Random RANDOM = new Random(System.currentTimeMillis());
+
     // 官网地址
     public static final String HOST = "http://fund.eastmoney.com/";
     public static final String HOST_INFO = "http://fundf10.eastmoney.com/";
     public static final String HOST_API = "api.fund.eastmoney.com";
 
-    // 基金持仓方案：0-基金编号，1-方案个数
-    public static String JJCC = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code={0}&topline={1}";
 
     // 基金公司：代码
     public static String COMPANY_INDEX = HOST + "company/{0}.html";
@@ -36,10 +38,10 @@ public class FundConfig {
     // 历史净值：代码
     public static String FUND_JZ = HOST_INFO + "jjjz_{0}.html";
     // 历史净值：随机串、代码、页码、时间戳
-    public static String FUND_JZ_XHR = "http://api.fund.eastmoney.com/f10/lsjz?callback=jQuery{0}&fundCode={1}&pageIndex={2}&pageSize=20&startDate=&endDate=&_={3}";
+    public static String FUND_JZ_XHR = "http://api.fund.eastmoney.com/f10/lsjz?callback={0}&fundCode={1}&pageIndex={2}&pageSize=20&startDate=&endDate=&_={3}";
 
-    // 基金持仓：代码
-    public static String FUND_CC = HOST_INFO + "ccmx_{0}.html";
+    // 基金持仓历史：代码，年度
+    public static String FUND_CC = HOST_INFO + "FundArchivesDatas.aspx?type=jjcc&code={0}&year={1}&topline=10";
 
     // 基金公司主页地址
     public static String COMPANY_REG = ".*fund.eastmoney.com/company/([\\d]+).html.*";

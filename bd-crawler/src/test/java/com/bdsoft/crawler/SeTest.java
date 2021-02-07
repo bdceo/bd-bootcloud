@@ -1,8 +1,10 @@
 package com.bdsoft.crawler;
 
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.MessageFormat;
+import java.util.Date;
 
 /**
  * se测试
@@ -18,6 +20,14 @@ public class SeTest {
 
         log.info("{} ， {}", Float.MIN_VALUE, Float.MAX_VALUE);
 
+        long t = 1612661114532L;
+        Date dt = new Date(t);
+        log.info("dt={}", dt.toString());
+        log.info("t={}, st={}", t, System.currentTimeMillis());
+
+        log.info("len={}", "18306229061496483879".length());
+        log.info("len={}", (System.currentTimeMillis()+"").length());
+        log.info("len={}", (IdWorker.getIdStr()).length());
 
     }
 }
