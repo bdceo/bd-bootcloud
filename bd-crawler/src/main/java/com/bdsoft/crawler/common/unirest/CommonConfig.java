@@ -6,5 +6,5 @@ package com.bdsoft.crawler.common.unirest;
 public class CommonConfig {
 
     // 模拟浏览器 用户代理 标识
-    public static final String  USER_AGENT ="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36";
+    public static final String  USER_AGENT ="Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36";
 }

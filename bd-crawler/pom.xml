@@ -93,6 +93,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.hshc.conform</groupId>
+            <artifactId>hshcconform-commons</artifactId>
+            <version>2.2.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,0 +1,10 @@
+
+
+基金历史净值
+http://api.fund.eastmoney.com/f10/lsjz?
+callback=jQuery18308509710389768792_1612425357238
+&fundCode=005968&pageIndex=2&pageSize=20
+&_=1612425950063
+
+
+
