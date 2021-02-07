@@ -1,0 +1,18 @@
+
+数据源：东方财富
+
+
+1，抓取国内上海、深圳、香港，所有上市公司股票基本信息
+    编码，名称，市场，公司……
+
+    个股详情：http://data.eastmoney.com/stockdata/600999.html
+
+
+
+2，分析聪明的钱，抓取北向资金持股操作
+    沪深股通-最新一日排名：http://data.eastmoney.com/hsgt/top10.html
+    某一天排名：http://data.eastmoney.com/hsgt/top10/2020-06-04.html
+
+        沪深港通资金流向：
+             http://push2.eastmoney.com/api/qt/kamt/get?fields1=f1,f2,f3,f4&fields2=f51,f52,f53,f54&ut=b2884a393a59ad64002292a3e90d46a5&cb=jQuery183046307029479725625_1591364690088&_=1591364750431
+
