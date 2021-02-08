@@ -1,5 +1,7 @@
 package com.bdsoft.crawler;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.bdsoft.crawler.modules.fund.FundConfig;
@@ -49,41 +51,47 @@ public class FetchFundTest extends SuperTest {
     }
 
     @Test
-    public void testJjcc() throws Exception {
+    public void testJjcc() {
         log.info("测试：基金持仓");
 
-        String code = "420003";
+        String code = "010146";
 
         // 先获取历史年度
-        String[] years = null;
-        String url = MessageFormat.format(FundConfig.FUND_CC, code, "");
+        JSONArray years;
+        String url = MessageFormat.format(FundConfig.FUND_STOCK, code, "");
         HttpResponse<String> res = Unirest.get(url).asString();
         if (res.isSuccess()) {
-            String jsRes = res.getBody();
-            // var apidata={ content:"<divh><th ",arryear:[2020,2019,2018],curyear:2020};
-            years = jsRes.substring(jsRes.indexOf(":[") + 2, jsRes.lastIndexOf("],")).split(",");
+            JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+            years = json.getJSONArray("arryear");
         } else {
             log.error("获取基金持仓历史年度失败：{}", url);
             return;
         }
 
-        // 按年度抓取
-        if (years != null) {
+        if (years != null && years.size() > 0) {
             boolean isLatest = true;
-            for (int i = 0; i < years.length; i++) {
-                url = MessageFormat.format(FundConfig.FUND_CC, code, years[i]);
+            // 按年度抓取
+            for (int i = 0; i < years.size(); i++) {
+                url = MessageFormat.format(FundConfig.FUND_STOCK, code, String.valueOf(years.getIntValue(i)));
                 res = Unirest.get(url).asString();
                 if (res.isSuccess()) {
-                    String jsRes = res.getBody();
-                    // var apidata={ content:"<divh><th ",arryear:[2020,2019,2018],curyear:2020};
-                    String content = jsRes.substring(jsRes.indexOf(":\"") + 2, jsRes.indexOf("\","));
+                    JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                    String content = json.getString("content");
                     Document html = Jsoup.parse(content);
 
+                    // 解析每季度持仓
                     Elements elements = html.getElementsByClass("boxitem");
                     for (Element ele : elements) {
-                        // 持仓时间
+                        // 持仓方案时间
                         String dt = ele.select("font.px12").get(0).text();
-                        FundHoldPO po = new FundHoldPO(code, DateUtils.parseDate(dt, "yyyy-MM-dd"));
+                        Date planDate = null;
+                        try {
+                            planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
+                        } catch (ParseException e) {
+                            log.error("持仓方案时间解析出错：" + dt, e);
+                            continue;
+                        }
+                        FundStockPO po = new FundStockPO(code, planDate);
 
                         // 持仓股票
                         Element table = ele.select("table.w782").get(0).select("tbody").first();
@@ -92,12 +100,24 @@ public class FetchFundTest extends SuperTest {
                             po.setStockName(tr.children().get(2).text());
                             if (isLatest) {
                                 po.setJzhRate(Float.valueOf(tr.children().get(6).text().replace("%", "")));
-                                po.setHoldStock(NumberFormat.getInstance().parse(tr.children().get(7).text()).floatValue());
-                                po.setHoldValue(NumberFormat.getInstance().parse(tr.children().get(8).text()).floatValue());
+                                try {
+                                    po.setStocks(NumberFormat.getInstance().parse(tr.children().get(7).text()).floatValue());
+                                    po.setValues(NumberFormat.getInstance().parse(tr.children().get(8).text()).floatValue());
+                                } catch (ParseException e) {
+                                    log.error("持股数、持仓市值解析出错：" + tr.text(), e);
+                                    po.setStocks(0);
+                                    po.setValues(0);
+                                }
                             } else {
                                 po.setJzhRate(Float.valueOf(tr.children().get(4).text().replace("%", "")));
-                                po.setHoldStock(NumberFormat.getInstance().parse(tr.children().get(5).text()).floatValue());
-                                po.setHoldValue(NumberFormat.getInstance().parse(tr.children().get(6).text()).floatValue());
+                                try {
+                                    po.setStocks(NumberFormat.getInstance().parse(tr.children().get(5).text()).floatValue());
+                                    po.setValues(NumberFormat.getInstance().parse(tr.children().get(6).text()).floatValue());
+                                } catch (ParseException e) {
+                                    log.error("持股数、持仓市值解析出错：" + tr.text(), e);
+                                    po.setStocks(0);
+                                    po.setValues(0);
+                                }
                             }
                             log.info("股票持仓：{}", JSONUtil.json(po));
                         }
@@ -107,6 +127,74 @@ public class FetchFundTest extends SuperTest {
                     log.error("获取基金持仓历史失败：{}", url);
                 }
             }
+        } else {
+            log.info("基金无股票持仓：{}", code);
+        }
+    }
+
+    @Test
+    public void testZqcc() {
+        log.info("测试：债券持仓");
+
+        String code = "160632";
+
+        // 先获取历史年度
+        JSONArray years;
+        String url = MessageFormat.format(FundConfig.FUND_BOND, code, "", String.valueOf(FundConfig.RANDOM.nextDouble()));
+        HttpResponse<String> res = Unirest.get(url).asString();
+        if (res.isSuccess()) {
+            JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+            years = json.getJSONArray("arryear");
+        } else {
+            log.error("获取债券持仓历史年度失败：{}", url);
+            return;
+        }
+
+        if (years != null && years.size() > 0) {
+            // 按年度抓取
+            for (int i = 0; i < years.size(); i++) {
+                url = MessageFormat.format(FundConfig.FUND_BOND, code, String.valueOf(years.getIntValue(i)), String.valueOf(FundConfig.RANDOM.nextDouble()));
+                res = Unirest.get(url).asString();
+                if (res.isSuccess()) {
+                    JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                    String content = json.getString("content");
+                    Document html = Jsoup.parse(content);
+
+                    // 解析每季度持仓
+                    Elements elements = html.getElementsByClass("boxitem");
+                    for (Element ele : elements) {
+                        // 持仓方案时间
+                        String dt = ele.select("font.px12").get(0).text();
+                        Date planDate;
+                        try {
+                            planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
+                        } catch (ParseException e) {
+                            log.error("持仓方案时间解析出错：" + dt, e);
+                            continue;
+                        }
+                        FundBondPO po = new FundBondPO(code, planDate);
+
+                        // 持仓债券
+                        Element table = ele.select("table.w782").get(0).select("tbody").first();
+                        for (Element tr : table.getElementsByTag("tr")) {
+                            po.setBondCode(tr.children().get(1).text());
+                            po.setBondName(tr.children().get(2).text());
+                            po.setJzhRate(Float.valueOf(tr.children().get(3).text().replace("%", "")));
+                            try {
+                                po.setValues(NumberFormat.getInstance().parse(tr.children().get(4).text()).floatValue());
+                            } catch (ParseException e) {
+                                log.error("持仓市值解析出错：" + tr.text(), e);
+                                po.setValues(0);
+                            }
+                            log.info("债券持仓：{}", JSONUtil.json(po));
+                        }
+                    }
+                } else {
+                    log.error("获取债券持仓历史失败：{}", url);
+                }
+            }
+        } else {
+            log.info("基金无债券持仓：{}", code);
         }
     }
 
@@ -280,6 +368,92 @@ public class FetchFundTest extends SuperTest {
             log.info("特色数据：{}", JSONUtil.json(tsData));
         } else {
             log.error("基金特色数据抓取失败：{}，{}", code, url);
+        }
+    }
+
+    @Test
+    public void testJjjl() {
+        log.info("测试：基金经理");
+
+        String code = "006327";
+        String url = MessageFormat.format(FundConfig.FUND_JL, code);
+
+        HttpResponse<String> res = Unirest.get(url).asString();
+        if (res.isSuccess()) {
+            Document html = Jsoup.parse(res.getBody());
+            Elements trs = html.selectFirst("div.boxitem").selectFirst("tbody").getElementsByTag("tr");
+            for (Element tr : trs) {
+                // 解析管理时间
+                Date start = null, end = null;
+                String tmp = tr.child(0).text();
+                try {
+                    start = DateUtils.parseDate(tmp, "yyyy-MM-dd");
+                } catch (ParseException e) {
+                    log.error("基金经理-起始期解析出错：" + tmp, e);
+                }
+                tmp = tr.child(1).text();
+                if (!"至今".equals(tmp)) {
+                    try {
+                        end = DateUtils.parseDate(tmp, "yyyy-MM-dd");
+                    } catch (ParseException e) {
+                        log.error("基金经理-截止期解析出错：" + tmp, e);
+                    }
+                }
+
+                // 解析管理期基金经理
+                Elements as = tr.child(2).getElementsByTag("a");
+                for (Element a : as) {
+                    FundManagerPO po = new FundManagerPO(code, start, end);
+                    po.setManagerName(a.text());
+                    po.setManagerCode(FundConfig.pickCode(a.attr("href"), FundConfig.MANAGER_REG));
+                    log.info("基金经理：{}", JSONUtil.json(po));
+                }
+            }
+        } else {
+            log.error("基金经理数据抓取失败：{}，{}", code, url);
+        }
+    }
+
+    @Test
+    public void testJjgs() {
+        log.info("测试：基金公司");
+
+        String code = "80000229";
+        String url = MessageFormat.format(FundConfig.COMPANY_GK, code);
+
+        HttpResponse<String> res = Unirest.get(url).asString();
+        if (res.isSuccess()) {
+            Document html = Jsoup.parse(res.getBody());
+
+            Elements trs = html.selectFirst("table.category-list").getElementsByTag("tr");
+            // 公司名称
+            String name = trs.get(0).child(1).text();
+            CompanyInfoPO po = new CompanyInfoPO(code, name);
+
+            // 成立日期
+            String tmp = trs.get(3).child(1).text();
+            try {
+                po.setSetupDate(DateUtils.parseDate(tmp, "yyyy-MM-dd"));
+            } catch (ParseException e) {
+                log.error("基金公司-成立日期解析失败：" + code, e);
+            }
+
+            // 注册地址
+            po.setRegAddress(trs.get(5).child(1).text());
+
+            // 管理基金数量
+            tmp = trs.get(11).child(1).getElementsByTag("a").first().text();
+            po.setFundTotal(Integer.valueOf(tmp));
+
+            // 基金经理人数
+            tmp = trs.get(12).child(1).text();
+            po.setFundScale(Float.valueOf(tmp.replace("亿元", "")));
+            tmp = trs.get(12).child(3).text();
+            po.setManagerTotal(Integer.valueOf(tmp.replace("人", "")));
+
+            log.info("基金公司：{}", JSONUtil.json(po));
+        } else {
+            log.error("基金公司数据抓取失败：{}，{}", code, url);
         }
     }
 

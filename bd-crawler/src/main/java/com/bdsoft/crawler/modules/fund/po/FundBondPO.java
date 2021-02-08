@@ -5,10 +5,10 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * 基金持仓
+ * 基金持仓-债券
  */
 @Data
-public class FundHoldPO {
+public class FundBondPO {
 
     /**
      * 基金标识
@@ -21,29 +21,27 @@ public class FundHoldPO {
     private Date dt;
 
     /**
-     * 股票代码，名称
+     * 债券代码，名称
      */
-    private String stockCode;
-    private String stockName;
+    private String bondCode;
+    private String bondName;
 
     /**
      * 占净值比例
      */
     private float jzhRate;
-    /**
-     * 持股数（万股）
-     */
-    private float holdStock;
+
     /**
      * 持仓市值（万元）
      */
-    private float holdValue;
+    private float values;
 
+    public FundBondPO() {
+    }
 
-    public FundHoldPO(String code, Date dt) {
+    public FundBondPO(String code, Date dt) {
         this.code = code;
         this.dt = dt;
     }
 
 }
-

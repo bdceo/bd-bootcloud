@@ -22,6 +22,7 @@ public class FundConfig {
 
     // 基金公司：代码
     public static String COMPANY_INDEX = HOST + "company/{0}.html";
+    public static String COMPANY_GK = HOST + "Company/f10/jbgk_{0}.html";
 
     // 基金主页：代码
     public static String FUND_INDEX = HOST + "{0}.html";
@@ -31,6 +32,7 @@ public class FundConfig {
 
     // 基金经理：代码
     public static String FUND_JL = HOST_INFO + "jjjl_{0}.html";
+    public static String MANAGER_REG = ".*fund.eastmoney.com/manager/([\\d]+).html.*";
 
     // 特色数据：代码
     public static String FUND_TS = HOST_INFO + "tsdata_{0}.html";
@@ -41,10 +43,24 @@ public class FundConfig {
     public static String FUND_JZ_XHR = "http://api.fund.eastmoney.com/f10/lsjz?callback={0}&fundCode={1}&pageIndex={2}&pageSize=20&startDate=&endDate=&_={3}";
 
     // 基金持仓历史：代码，年度
-    public static String FUND_CC = HOST_INFO + "FundArchivesDatas.aspx?type=jjcc&code={0}&year={1}&topline=10";
+    public static String FUND_STOCK = HOST_INFO + "FundArchivesDatas.aspx?type=jjcc&code={0}&year={1}&topline=10";
+    public static String FUND_BOND = HOST_INFO + "FundArchivesDatas.aspx?type=zqcc&code={0}&year={1}&rt={2}";
 
     // 基金公司主页地址
     public static String COMPANY_REG = ".*fund.eastmoney.com/company/([\\d]+).html.*";
+
+    /**
+     * 提取js响应中的json体
+     *
+     * @param jsRes js内容
+     * @return
+     */
+    public static String pickJsJson(String jsRes) {
+        if (StringUtils.isEmpty(jsRes)) {
+            return null;
+        }
+        return jsRes.substring(jsRes.indexOf("{"), jsRes.length() - 1);
+    }
 
     /**
      * 从url提取code
