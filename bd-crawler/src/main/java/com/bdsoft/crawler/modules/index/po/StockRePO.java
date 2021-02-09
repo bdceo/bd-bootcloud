@@ -16,7 +16,7 @@ public class StockRePO extends CommonPO {
     /**
      * 中证行业
      */
-    private String industry;
+    private String industryName;
 
     /**
      * 权重
@@ -26,7 +26,7 @@ public class StockRePO extends CommonPO {
     public StockRePO(String indexCode, String code, String name, String industry, float weight) {
         super(code, name);
         this.indexCode = indexCode;
-        this.industry = industry;
+        this.industryName = industry;
         this.weight = weight;
     }
 

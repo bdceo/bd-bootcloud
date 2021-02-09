@@ -1,25 +1,45 @@
-package com.bdsoft.excel;
+package com.bdsoft.crawler.excel;
 
+import com.bdsoft.crawler.common.CopyUtils;
+import com.bdsoft.crawler.modules.index.entity.IndustryCs;
+import com.bdsoft.crawler.modules.index.mapper.IndustryCsMapper;
 import com.hshc.basetools.json.JSONUtil;
 import com.hshc.conform.poi.reader.CellMappings;
 import com.hshc.conform.poi.reader.ExcelReaderBuilder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * 中证行业指数
+ * 中证行业分类
  */
 @Slf4j
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class CsIndustryExcelTest {
 
-    public static void main(String[] args) throws Exception {
-        File file = new File("e:/download/cs-industry.xlsx");
+    @Autowired
+    private IndustryCsMapper industryCsMapper;
+
+
+    /**
+     * 解析中证行业分类信息
+     */
+    @Test
+    private void parseIndustry() throws Exception {
+        File file = new File("E:\\download\\中证数据\\cs-industry.xlsx");
         ExcelReaderBuilder builder = ExcelReaderBuilder.of(new FileInputStream(file));
         CellMappings<Integer> mappings = CellMappings.newIndexMapping()
                 .addMapping(0, "code1")
@@ -34,7 +54,6 @@ public class CsIndustryExcelTest {
         builder.setMapping(mappings).setStartRow(1);
 
         List<CsIndustry> data = builder.out(CsIndustry.class);
-
         List<IndustryModel> modelList = new ArrayList<>(data.size() * 3);
         for (CsIndustry item : data) {
             log.info("行业：{}", JSONUtil.json(item));
@@ -65,6 +84,17 @@ public class CsIndustryExcelTest {
                 log.info("四级：{}", JSONUtil.json(model));
             }
         }
+
+        // 入库
+        List<IndustryCs> indList = CopyUtils.copy(modelList, IndustryCs.class);
+        Set<String> codeSet = new HashSet<>();
+        for (IndustryCs item : indList) {
+            if (!codeSet.contains(item.getCode())) {
+                int rows = industryCsMapper.insert(item);
+                log.info("insert {}", rows);
+                codeSet.add(item.getCode());
+            }
+        }
     }
 
     @Data
@@ -79,7 +109,7 @@ public class CsIndustryExcelTest {
          */
         private String code;
         private String name;
-        private String remark;
+        private String info;
 
         /**
          * 对应上级
@@ -113,7 +143,7 @@ public class CsIndustryExcelTest {
             this.level = level;
             this.code = code;
             this.name = name;
-            this.remark = remark;
+            this.info = remark;
             this.code1 = code1;
             this.code2 = code2;
             this.code3 = code3;

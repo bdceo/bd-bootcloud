@@ -15,6 +15,6 @@ public class IndexConfig {
     public static final String INDEX_FUND_PAGE = HOST + "search/index-derivatives?index_name={0}";
 
     // 搜索指数：页码，每页条数
-    public static final String INDEX_SEARCH = HOST + "indices/index?page={0}&page_size=100&data_type=json";
+    public static final String INDEX_SEARCH = HOST + "indices/index?page={0}&page_size=50&data_type=json&is_custom_0=1&by=asc";
 
 }
