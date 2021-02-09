@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.bdsoft.crawler.common.CopyUtils;
 import com.bdsoft.crawler.modules.index.IndexConfig;
 import com.bdsoft.crawler.modules.index.entity.Index;
+import com.bdsoft.crawler.modules.index.entity.IndexFund;
 import com.bdsoft.crawler.modules.index.entity.IndexStock;
 import com.bdsoft.crawler.modules.index.entity.IndustryCs;
 import com.bdsoft.crawler.modules.index.mapper.IndexFundMapper;
@@ -174,44 +175,60 @@ public class FetchIndexTest extends SuperTest {
 
     @Test
     public void testIndexFund() throws Exception {
-        log.info("测试：指数产品（简介、十大权重股）");
+        log.info("测试：指数产品");
 
-        String code = "";
-        String name = "沪深300";
-        //name = "180成长";
-        String url = MessageFormat.format(IndexConfig.INDEX_FUND_PAGE, name);
+        // 加载数据库指数信息
+        List<Index> indexList = indexMapper.selectList(null);
+        if (CollectionUtils.isEmpty(indexList)) {
+            log.info("数据库指数信息加载失败");
+            return;
+        }
 
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            Document html = Jsoup.parse(res.getBody());
-            // 产品列表
-            Element tableEle = html.getElementById("item");
-            if (tableEle.hasText()) {
-                Elements trs = tableEle.getElementsByTag("tr");
-                for (Element tr : trs) {
-                    Elements tds = tr.getElementsByTag("td");
-                    // 证券代码
-                    String fundCode = tds.get(0).text();
-                    // 基金名称
-                    String fundName = tds.get(1).text();
-                    // 成立日期
-                    String setup = tds.get(2).text();
-                    Date setupDate = DateUtils.parseDate(setup, "yyyy-MM-dd");
-                    // 基金类型：股票、混合
-                    String fundType = tds.get(3).text();
-                    // 产品类型：指数基金、连接基金、ETF、LOF
-                    String productType = tds.get(4).text();
-                    // 基金公司
-                    String company = tds.last().text();
+        Date now = new Date();
 
-                    FundRePO po = new FundRePO(code, fundCode, fundName, setupDate, fundType, productType, company);
-                    log.info("{}\t{}\t{}\t{}\t{}", fundCode, fundName, setup, fundType, productType, company);
+        // 遍历指数
+        for (Index index : indexList) {
+            String code = index.getCode();
+            String name = index.getName().replaceAll(" ","");
+            String url = MessageFormat.format(IndexConfig.INDEX_FUND_PAGE, name);
+
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                Document html = Jsoup.parse(res.getBody());
+                // 产品列表
+                Element tableEle = html.getElementById("item");
+                if (tableEle.hasText()) {
+                    Elements trs = tableEle.getElementsByTag("tr");
+                    for (Element tr : trs) {
+                        Elements tds = tr.getElementsByTag("td");
+                        // 证券代码
+                        String fundCode = tds.get(0).text();
+                        // 基金名称
+                        String fundName = tds.get(1).text();
+                        // 成立日期
+                        String setup = tds.get(2).text();
+                        Date setupDate = DateUtils.parseDate(setup, "yyyy-MM-dd");
+                        // 基金类型：股票、混合
+                        String fundType = tds.get(3).text();
+                        // 产品类型：指数基金、连接基金、ETF、LOF
+                        String productType = tds.get(4).text();
+                        // 基金公司in
+                        String company = tds.last().text();
+
+                        FundRePO po = new FundRePO(code, fundCode, fundName, setupDate, fundType, productType, company);
+                        log.info("{}\t{}\t{}\t{}\t{}", fundCode, fundName, setup, fundType, productType, company);
+
+                        IndexFund ifd = CopyUtils.copy(po, IndexFund.class);
+                        ifd.setSynTime(now);
+                        int rows = indexFundMapper.insert(ifd);
+                        log.info("insert {}", rows);
+                    }
+                } else {
+                    log.info("指数：{} 无跟踪产品", name);
                 }
             } else {
-                log.info("指数：{} 无跟踪产品", name);
+                log.error("指数产品抓取失败：{}，{}", name, url);
             }
-        } else {
-            log.error("指数产品抓取失败：{}，{}", name, url);
         }
     }
 

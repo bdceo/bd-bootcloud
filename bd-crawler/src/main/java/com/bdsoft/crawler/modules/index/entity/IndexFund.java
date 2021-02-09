@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * <p>
@@ -63,12 +64,12 @@ public class IndexFund implements Serializable {
     /**
      * 基金成立日期
      */
-    private LocalDate setupDate;
+    private Date setupDate;
 
     /**
      * 同步时间
      */
-    private LocalDateTime synTime;
+    private Date synTime;
 
 
 }
