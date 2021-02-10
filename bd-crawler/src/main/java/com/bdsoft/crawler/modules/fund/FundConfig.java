@@ -19,6 +19,10 @@ public class FundConfig {
     public static final String HOST_INFO = "http://fundf10.eastmoney.com/";
     public static final String HOST_API = "api.fund.eastmoney.com";
 
+    // 基金排行：页码、随机串
+    public static final String FUND_RANK_HOST = "fund.eastmoney.com";
+    public static final String FUND_RANK_REFER="http://fund.eastmoney.com/data/fundranking.html";
+    public static final String FUND_RANK="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=lnzf&st=desc&pi={0}&pn=50&dx=0&v={1}";
 
     // 基金公司：代码
     public static String COMPANY_INDEX = HOST + "company/{0}.html";

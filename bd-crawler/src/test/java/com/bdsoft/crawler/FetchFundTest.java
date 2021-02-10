@@ -4,11 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.bdsoft.crawler.common.CopyUtils;
 import com.bdsoft.crawler.modules.fund.FundConfig;
-import com.bdsoft.crawler.modules.fund.entity.FundInfo;
-import com.bdsoft.crawler.modules.fund.entity.FundValue;
-import com.bdsoft.crawler.modules.fund.mapper.FundInfoMapper;
-import com.bdsoft.crawler.modules.fund.mapper.FundValueMapper;
+import com.bdsoft.crawler.modules.fund.entity.Fund;
+import com.bdsoft.crawler.modules.fund.entity.FundFee;
+import com.bdsoft.crawler.modules.fund.entity.FundTs;
+import com.bdsoft.crawler.modules.fund.mapper.*;
 import com.bdsoft.crawler.modules.fund.po.*;
 import com.bdsoft.crawler.modules.fund.xhr.JzhData;
 import com.bdsoft.crawler.modules.fund.xhr.JzhItem;
@@ -23,7 +24,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.CollectionUtils;
 
 import java.text.MessageFormat;
@@ -32,22 +36,74 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class FetchFundTest extends SuperTest {
 
     @Autowired
+    private FundMapper fundMapper;
+    @Autowired
     private FundInfoMapper fundInfoMapper;
     @Autowired
-    private FundValueMapper fundValueMapper;
+    private FundFeeMapper fundFeeMapper;
+    @Autowired
+    private FundTsMapper fundTsMapper;
+    @Autowired
+    private FundValMapper fundValMapper;
 
     @Test
-    public void testList() {
-        List<FundInfo> infoList = fundInfoMapper.selectList(null);
-        List<FundValue> valueList = fundValueMapper.selectList(null);
-        log.info("info size={}, value size={}", infoList.size(), valueList.size());
+    public void testRank() {
+        log.info("测试：基金排行");
+        Unirest.config().addDefaultHeader("Referer", FundConfig.FUND_RANK_REFER);
+        Unirest.config().addDefaultHeader("Host", FundConfig.FUND_RANK_HOST);
+
+        // 获取总页数
+        int pageTotal;
+        String url = MessageFormat.format(FundConfig.FUND_RANK, 1, String.valueOf(FundConfig.RANDOM.nextDouble()));
+        HttpResponse<String> res = Unirest.get(url).asString();
+        if (res.isSuccess()) {
+            JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+            pageTotal = json.getIntValue("allPages");
+            log.info("suc： 基金总数={}, 总页数={}", json.getIntValue("allRecords"), pageTotal);
+        } else {
+            log.error("获取基金排行失败：{}", url);
+            return;
+        }
+
+        Date now = new Date();
+        // 分页获取
+        for (int pageIndex = 1; pageIndex <= pageTotal; pageIndex++) {
+            url = MessageFormat.format(FundConfig.FUND_RANK, pageIndex, String.valueOf(FundConfig.RANDOM.nextDouble()));
+            res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                JSONArray jsonData = json.getJSONArray("datas");
+                for (int i = 0; i < jsonData.size(); i++) {
+                    String tmp = jsonData.getString(i);
+                    String[] fundAtt = tmp.split(",");
+                    FundPO po = new FundPO(fundAtt[0], fundAtt[1], fundAtt[2]);
+                    log.info("基金base={}", JSONUtil.json(po));
+
+                    // 入库
+                    Fund fund = CopyUtils.copy(po, Fund.class);
+                    fund.setSynTime(now);
+                    int rows = fundMapper.insert(fund);
+                    log.info("insert {}", rows);
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                log.error("获取基金排行失败：{}-{}", pageIndex, url);
+                continue;
+            }
+        }
     }
 
     @Test
@@ -202,83 +258,137 @@ public class FetchFundTest extends SuperTest {
     public void testJjgk() {
         log.info("测试：基金概况、手续费");
 
-        String code = "006341";
-        String url = MessageFormat.format(FundConfig.FUND_GK, code);
-        FundPO fund = new FundPO(code);
-        FundFeePO fee = new FundFeePO();
+        Date now = new Date();
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(null);
 
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            Document html = Jsoup.parse(res.getBody());
+        // 过滤已抓取
+        List<FundFee> feeList = fundFeeMapper.selectList(null);
+        if (!CollectionUtils.isEmpty(feeList)) {
+            List<String> codeList = feeList.stream().map(FundFee::getCode).collect(Collectors.toList());
+            fundList = fundList.stream().filter(f -> !codeList.contains(f.getCode())).collect(Collectors.toList());
+        }
 
-            // 基金概况
-            Element tableEle = html.getElementsByClass("info").get(0);
-            Elements trs = tableEle.getElementsByTag("tr");
+        for (Fund item : fundList) {
+            String code = item.getCode();
+            String url = MessageFormat.format(FundConfig.FUND_GK, code);
+            FundPO fund = new FundPO(code);
+            FundFeePO fee = new FundFeePO(code);
 
-            // 简称、全称
-            Elements tr1 = trs.get(0).getElementsByTag("td");
-            fund.setFullName(tr1.get(0).text());
-            fund.setName(tr1.get(1).text());
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                Document html = Jsoup.parse(res.getBody());
 
-            // 类型
-            Elements tr2 = trs.get(1).getElementsByTag("td");
-            fund.setType(tr2.get(1).text());
+                // 基金概况
+                Element tableEle = html.getElementsByClass("info").get(0);
+                Elements trs = tableEle.getElementsByTag("tr");
 
-            // 发行日期
-            Elements tr3 = trs.get(2).getElementsByTag("td");
-            String tmp = tr3.get(0).text();
-            try {
-                Date tmpDate = DateUtils.parseDate(tmp, "yyyy年MM月dd日");
-                fund.setFxDate(tmpDate);
-            } catch (ParseException e) {
-                log.error("发行日期解析失败：{}", tmp);
+                // 简称、全称
+                Elements tr1 = trs.get(0).getElementsByTag("td");
+                fund.setFullName(tr1.get(0).text());
+                fund.setName(tr1.get(1).text());
+
+                // 类型
+                Elements tr2 = trs.get(1).getElementsByTag("td");
+                fund.setType(tr2.get(1).text());
+
+                // 发行日期
+                Elements tr3 = trs.get(2).getElementsByTag("td");
+                String tmp = tr3.get(0).text();
+                try {
+                    Date tmpDate = DateUtils.parseDate(tmp, "yyyy年MM月dd日");
+                    fund.setFxDate(tmpDate);
+                } catch (ParseException e) {
+                    log.error("发行日期解析失败：{}", tmp);
+                }
+
+                // 基金规模
+                Elements tr4 = trs.get(3).getElementsByTag("td");
+                tmp = tr4.get(0).text();
+                if (tmp.contains("---")) {
+                    fund.setGm(0);
+                } else {
+                    String gm = tmp.split("亿")[0];
+                    fund.setGm(Float.parseFloat(gm));
+                }
+
+                // 基金公司
+                Elements tr5 = trs.get(4).getElementsByTag("td");
+                Element td = tr5.get(0).getElementsByTag("a").get(0);
+                fund.setCompany(td.text());
+                tmp = td.attr("href");
+                tmp = FundConfig.pickCode(tmp, FundConfig.COMPANY_REG);
+                fund.setCompanyCode(tmp);
+                log.info("基金概况：{}", JSONUtil.json(fund));
+
+                // 更新基金概况信息
+                item.setGk(fund);
+                item.setSynTime(now);
+                int rows = fundMapper.updateById(item);
+                log.info("更新基金概况信息：{}-{}", rows, JSONUtil.json(item));
+
+                // 管理费、托管费
+                Elements tr7 = trs.get(6).getElementsByTag("td");
+                tmp = tr7.get(0).text();
+                if (tmp.contains("%")) {
+                    String glf = tmp.split("%")[0];
+                    fee.setGlf(Float.valueOf(glf));
+                } else {
+                    fee.setGlf(0);
+                }
+                tmp = tr7.get(1).text();
+                String tgf = tmp.split("%")[0];
+                fee.setTgf(Float.valueOf(tgf));
+
+                // 销售服务费、认购费
+                Elements tr8 = trs.get(7).getElementsByTag("td");
+                tmp = tr8.get(0).text();
+                if (tmp.contains("---")) {
+                    fee.setXsh(0);
+                } else {
+                    String xsh = tmp.split("%")[0];
+                    fee.setXsh(Float.valueOf(xsh));
+                }
+                if (tr8.get(1).getElementsByTag("span").size() > 0) {
+                    tmp = tr8.get(1).getElementsByTag("span").get(0).text();
+                } else {
+                    tmp = tr8.get(1).text();
+                }
+                if (tmp.contains("---")) {
+                    fee.setRgf(0);
+                } else {
+                    String rgf = tmp.split("%")[0];
+                    fee.setRgf(Float.valueOf(rgf));
+                }
+
+                // 申购、赎回费
+                Elements tr9 = trs.get(8).getElementsByTag("td");
+                if (tr9.get(0).getElementsByTag("span").size() > 0) {
+                    tmp = tr9.get(0).getElementsByTag("span").get(0).text();
+                } else {
+                    tmp = tr9.get(0).text();
+                }
+                if (tmp.contains("---")) {
+                    fee.setSgf(0);
+                } else {
+                    String sgf = tmp.split("%")[0];
+                    fee.setSgf(Float.valueOf(sgf));
+                }
+                tmp = tr9.get(1).text();
+                if (tmp.contains("---")) {
+                    fee.setShf(0);
+                } else {
+                    String shf = tmp.split("%")[0];
+                    fee.setShf(Float.valueOf(shf));
+                }
+                log.info("手续费：{}", JSONUtil.json(fee));
+
+                FundFee fundFee = CopyUtils.copy(fee, FundFee.class);
+                rows = fundFeeMapper.insert(fundFee);
+                log.info("insert fee {}", rows);
+            } else {
+                log.error("基金概况信息抓取失败：{}，{}", code, url);
             }
-
-            // 基金规模
-            Elements tr4 = trs.get(3).getElementsByTag("td");
-            tmp = tr4.get(0).text();
-            String gm = tmp.split("亿")[0];
-            fund.setGm(Float.parseFloat(gm));
-
-            // 基金公司
-            Elements tr5 = trs.get(4).getElementsByTag("td");
-            Element td = tr5.get(0).getElementsByTag("a").get(0);
-            fund.setCompany(td.text());
-            tmp = td.attr("href");
-            tmp = FundConfig.pickCode(tmp, FundConfig.COMPANY_REG);
-            fund.setCompanyCode(tmp);
-            log.info("基金概况：{}", JSONUtil.json(fund));
-
-            // 管理费、托管费
-            Elements tr7 = trs.get(6).getElementsByTag("td");
-            tmp = tr7.get(0).text();
-            String glf = tmp.split("%")[0];
-            fee.setGlf(Float.valueOf(glf));
-            tmp = tr7.get(1).text();
-            String tgf = tmp.split("%")[0];
-            fee.setTgf(Float.valueOf(tgf));
-
-            // 销售服务费、认购费
-            Elements tr8 = trs.get(7).getElementsByTag("td");
-            tmp = tr8.get(0).text();
-            String xsh = tmp.split("%")[0];
-            fee.setXsh(Float.valueOf(xsh));
-            tmp = tr8.get(1).getElementsByTag("span").get(0).text();
-            String rgf = tmp.split("%")[0];
-            fee.setRgf(Float.valueOf(rgf));
-
-            // 申购、赎回费
-            Elements tr9 = trs.get(8).getElementsByTag("td");
-            tmp = tr9.get(0).getElementsByTag("span").get(0).text();
-            String sgf = tmp.split("%")[0];
-            fee.setSgf(Float.valueOf(sgf));
-            tmp = tr9.get(1).text();
-            String shf = tmp.split("%")[0];
-            fee.setShf(Float.valueOf(shf));
-            log.info("手续费：{}", JSONUtil.json(fee));
-
-        } else {
-            log.error("基金概况信息抓取失败：{}，{}", code, url);
         }
     }
 
@@ -333,41 +443,78 @@ public class FetchFundTest extends SuperTest {
     public void testTs() {
         log.info("测试：特色数据");
 
-        String code = "008592";
-        String url = MessageFormat.format(FundConfig.FUND_TS, code);
-        FundDataPO tsData = new FundDataPO(code);
+        Date now = new Date();
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(null);
 
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            Document html = Jsoup.parse(res.getBody());
+        // 过滤已抓取
+        List<FundTs> tsList = fundTsMapper.selectList(null);
+        if (!CollectionUtils.isEmpty(tsList)) {
+            List<String> codeList = tsList.stream().map(FundTs::getCode).collect(Collectors.toList());
+            fundList = fundList.stream().filter(f -> !codeList.contains(f.getCode())).collect(Collectors.toList());
+        }
 
-            // 基金风险-风险等级
-            Elements tmpElements = html.getElementsByClass("allfxdj");
-            Element tmpEle = tmpElements.get(0).getElementsByClass("chooseLow").get(0);
-            tsData.setWholeRiskLevel(tmpEle.text());
-            tmpEle = tmpElements.get(1).getElementsByClass("chooseLow").get(0);
-            tsData.setSameRiskLevel(tmpEle.text());
+        for (Fund item : fundList) {
+            String code = item.getCode();
+            String url = MessageFormat.format(FundConfig.FUND_TS, code);
+            FundDataPO tsData = new FundDataPO(code);
 
-            // 基金风险-风险指标
-            tmpEle = html.getElementsByClass("fxtb").get(0);
-            tmpElements = tmpEle.getElementsByTag("tr");
-            for (int i = 1; i < tmpElements.size(); i++) {
-                Elements tds = tmpElements.get(i).getElementsByTag("td");
-                tsData.setRiskIndex(tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text());
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                Document html = Jsoup.parse(res.getBody());
+
+                // 基金风险-风险等级
+                Elements tmpElements = html.getElementsByClass("allfxdj");
+                if (tmpElements.get(0).getElementsByClass("chooseLow").size() > 0) {
+                    Element tmpEle = tmpElements.get(0).getElementsByClass("chooseLow").get(0);
+                    tsData.setWholeRiskLevel(tmpEle.text());
+                } else {
+                    tsData.setWholeRiskLevel(-1);
+                }
+                if (tmpElements.get(1).getElementsByClass("chooseLow").size() > 0) {
+                    Element tmpEle = tmpElements.get(1).getElementsByClass("chooseLow").get(0);
+                    tsData.setSameRiskLevel(tmpEle.text());
+                } else {
+                    tsData.setSameRiskLevel(-1);
+                }
+
+                // 基金风险-风险指标
+                Element tmpEle = html.getElementsByClass("fxtb").get(0);
+                tmpElements = tmpEle.getElementsByTag("tr");
+                for (int i = 1; i < tmpElements.size(); i++) {
+                    Elements tds = tmpElements.get(i).getElementsByTag("td");
+                    tsData.setRiskIndex(tds.get(0).text(), tds.get(1).text(), tds.get(2).text(), tds.get(3).text());
+                }
+
+                // 指数基金指标
+                tmpEle = html.getElementById("jjzsfj");
+                if (tmpEle != null) {
+                    tmpElements = tmpEle.getElementsByClass("fxtb").get(0).getElementsByTag("tr");
+                    tmpElements = tmpElements.get(1).getElementsByTag("td");
+                    tsData.setTrackIndex(tmpElements.get(0).text());
+                    String tmp = tmpElements.get(1).text();
+                    if (tmp.contains("--")) {
+                        tsData.setTrackDiff(0);
+                    } else {
+                        tsData.setTrackDiff(Float.valueOf(tmp.replace("%", "")));
+                    }
+                    tmp = tmpElements.get(2).text();
+                    if (tmp.contains("--")) {
+                        tsData.setSameDiff(0);
+                    } else {
+                        tsData.setSameDiff(Float.valueOf(tmp.replace("%", "")));
+                    }
+                }
+                log.info("特色数据：{}", JSONUtil.json(tsData));
+
+                // 入库
+                FundTs ts = CopyUtils.copy(tsData, FundTs.class);
+                ts.setSynTime(now);
+                int rows = fundTsMapper.insert(ts);
+                log.info("insert {}", rows);
+            } else {
+                log.error("基金特色数据抓取失败：{}，{}", code, url);
             }
-
-            // 指数基金指标
-            tmpEle = html.getElementById("jjzsfj");
-            if (tmpEle != null) {
-                tmpElements = tmpEle.getElementsByClass("fxtb").get(0).getElementsByTag("tr");
-                tmpElements = tmpElements.get(1).getElementsByTag("td");
-                tsData.setTrackIndex(tmpElements.get(0).text());
-                tsData.setTrackDiff(Float.valueOf(tmpElements.get(1).text().replace("%", "")));
-                tsData.setSameDiff(Float.valueOf(tmpElements.get(2).text().replace("%", "")));
-            }
-            log.info("特色数据：{}", JSONUtil.json(tsData));
-        } else {
-            log.error("基金特色数据抓取失败：{}，{}", code, url);
         }
     }
 
@@ -428,7 +575,7 @@ public class FetchFundTest extends SuperTest {
             Elements trs = html.selectFirst("table.category-list").getElementsByTag("tr");
             // 公司名称
             String name = trs.get(0).child(1).text();
-            CompanyInfoPO po = new CompanyInfoPO(code, name);
+            FundCompanyPO po = new FundCompanyPO(code, name);
 
             // 成立日期
             String tmp = trs.get(3).child(1).text();

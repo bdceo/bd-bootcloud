@@ -11,11 +11,12 @@ import java.util.Date;
 public class FundPO {
 
     /**
-     * 基金标识：代码，简称，全称
+     * 基金标识：代码，简称，全称，拼音
      */
     private String code;
     private String name;
     private String fullName;
+    private String py;
 
     /**
      * 类型：股票、债券、指数、混合
@@ -43,5 +44,11 @@ public class FundPO {
 
     public FundPO(String code) {
         this.code = code;
+    }
+
+    public FundPO(String code, String name, String py) {
+        this.code = code;
+        this.name = name;
+        this.py = py;
     }
 }

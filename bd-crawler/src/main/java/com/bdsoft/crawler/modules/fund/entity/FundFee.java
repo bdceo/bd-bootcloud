@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 基金概况
+ * 基金手续费信息
  * </p>
  *
  * @author bdceo
@@ -20,8 +20,8 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("t_fund_info")
-public class FundInfo implements Serializable {
+@TableName("t_fund_fee")
+public class FundFee implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,29 +34,34 @@ public class FundInfo implements Serializable {
     private String code;
 
     /**
-     * 投资目标
+     * 托管费
      */
-    private String target;
+    private Float glf;
 
     /**
-     * 投资理念
+     * 管理费
      */
-    private String idea;
+    private Float tgf;
 
     /**
-     * 投资范围
+     * 销售服务费
      */
-    private String range;
+    private Float xsh;
 
     /**
-     * 投资策略
+     * 认购费
      */
-    private String strategy;
+    private Float rgf;
 
     /**
-     * 分红政策
+     * 申购费
      */
-    private String bonus;
+    private Float sgf;
+
+    /**
+     * 赎回费
+     */
+    private Float shf;
 
 
 }

@@ -55,6 +55,14 @@ public class FundDataPO {
         this.wholeRiskLevel = this.getRiskLevel(riskName);
     }
 
+    public void setWholeRiskLevel(int wholeRiskLevel) {
+        this.wholeRiskLevel = wholeRiskLevel;
+    }
+
+    public void setSameRiskLevel(int sameRiskLevel) {
+        this.sameRiskLevel = sameRiskLevel;
+    }
+
     public void setSameRiskLevel(String riskName) {
         this.sameRiskLevel = this.getRiskLevel(riskName);
     }

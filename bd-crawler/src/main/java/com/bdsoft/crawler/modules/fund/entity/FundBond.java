@@ -8,10 +8,12 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * <p>
- * 基金概况
+ * 基金债券持仓
  * </p>
  *
  * @author bdceo
@@ -20,8 +22,8 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("t_fund_info")
-public class FundInfo implements Serializable {
+@TableName("t_fund_bond")
+public class FundBond implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,29 +36,29 @@ public class FundInfo implements Serializable {
     private String code;
 
     /**
-     * 投资目标
+     * 方案日期
      */
-    private String target;
+    private Date dt;
 
     /**
-     * 投资理念
+     * 债券代码
      */
-    private String idea;
+    private String bondCode;
 
     /**
-     * 投资范围
+     * 债券名称
      */
-    private String range;
+    private String bondName;
 
     /**
-     * 投资策略
+     * 占净值比例
      */
-    private String strategy;
+    private Float valueRate;
 
     /**
-     * 分红政策
+     * 持仓市值（万元）
      */
-    private String bonus;
+    private Float values;
 
 
 }

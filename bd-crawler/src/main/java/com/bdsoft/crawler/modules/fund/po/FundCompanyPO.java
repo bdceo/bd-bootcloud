@@ -8,7 +8,7 @@ import java.util.Date;
  * 基金公司
  */
 @Data
-public class CompanyInfoPO {
+public class FundCompanyPO {
 
     /**
      * 公司标识、名称、注册地址
@@ -37,10 +37,10 @@ public class CompanyInfoPO {
      */
     private float fundScale;
 
-    public CompanyInfoPO() {
+    public FundCompanyPO() {
     }
 
-    public CompanyInfoPO(String code, String name) {
+    public FundCompanyPO(String code, String name) {
         this.code = code;
         this.name = name;
     }
