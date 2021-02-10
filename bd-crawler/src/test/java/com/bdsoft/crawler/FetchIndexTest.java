@@ -146,7 +146,8 @@ public class FetchIndexTest extends SuperTest {
                     String stockCode = tds.get(0).text();
                     String stockName = tds.get(1).text();
                     String industry = tds.get(2).text();
-                    float weight = Float.valueOf(tds.get(3).text());
+                    String tmp = tds.get(3).text();
+                    float weight = StringUtils.isNotBlank(tmp) ? Float.valueOf(tmp) : 0;
                     log.info("指数={}，代码={}，名称={}，行业={}，权重={}", code, stockCode, stockName, industry, weight);
                     poList.add(new StockRePO(code, stockCode, stockName, industry, weight));
                 }
