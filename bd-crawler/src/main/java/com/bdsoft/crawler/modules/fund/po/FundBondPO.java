@@ -29,12 +29,12 @@ public class FundBondPO {
     /**
      * 占净值比例
      */
-    private float jzhRate;
+    private float valueRate;
 
     /**
      * 持仓市值（万元）
      */
-    private float values;
+    private float marketValue;
 
     public FundBondPO() {
     }

@@ -3,12 +3,11 @@ package com.bdsoft.crawler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.bdsoft.crawler.common.CopyUtils;
 import com.bdsoft.crawler.modules.fund.FundConfig;
-import com.bdsoft.crawler.modules.fund.entity.Fund;
-import com.bdsoft.crawler.modules.fund.entity.FundFee;
-import com.bdsoft.crawler.modules.fund.entity.FundTs;
+import com.bdsoft.crawler.modules.fund.entity.*;
 import com.bdsoft.crawler.modules.fund.mapper.*;
 import com.bdsoft.crawler.modules.fund.po.*;
 import com.bdsoft.crawler.modules.fund.xhr.JzhData;
@@ -36,6 +35,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,6 +53,14 @@ public class FetchFundTest extends SuperTest {
     private FundTsMapper fundTsMapper;
     @Autowired
     private FundValMapper fundValMapper;
+    @Autowired
+    private FundStockMapper fundStockMapper;
+    @Autowired
+    private FundBondMapper fundBondMapper;
+    @Autowired
+    private CompanyMapper companyMapper;
+    @Autowired
+    private FundManagerMapper fundManagerMapper;
 
     @Test
     public void testRank() {
@@ -110,81 +118,107 @@ public class FetchFundTest extends SuperTest {
     public void testJjcc() {
         log.info("测试：基金持仓");
 
-        String code = "010146";
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(null);
 
-        // 先获取历史年度
-        JSONArray years;
-        String url = MessageFormat.format(FundConfig.FUND_STOCK, code, "");
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
-            years = json.getJSONArray("arryear");
-        } else {
-            log.error("获取基金持仓历史年度失败：{}", url);
-            return;
+        List<FundStock> fsList = fundStockMapper.selectList(new QueryWrapper<FundStock>().select("code"));
+        if(!CollectionUtils.isEmpty(fsList)){
+            Set<String> fundCodes = fsList.parallelStream().map(FundStock::getCode).collect(Collectors.toSet());
+            fundList= fundList.stream().filter(f->!fundCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
-        if (years != null && years.size() > 0) {
-            boolean isLatest = true;
-            // 按年度抓取
-            for (int i = 0; i < years.size(); i++) {
-                url = MessageFormat.format(FundConfig.FUND_STOCK, code, String.valueOf(years.getIntValue(i)));
-                res = Unirest.get(url).asString();
-                if (res.isSuccess()) {
-                    JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
-                    String content = json.getString("content");
-                    Document html = Jsoup.parse(content);
+        // 遍历抓取
+        for (Fund item : fundList) {
+            String code = item.getCode();
 
-                    // 解析每季度持仓
-                    Elements elements = html.getElementsByClass("boxitem");
-                    for (Element ele : elements) {
-                        // 持仓方案时间
-                        String dt = ele.select("font.px12").get(0).text();
-                        Date planDate = null;
-                        try {
-                            planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
-                        } catch (ParseException e) {
-                            log.error("持仓方案时间解析出错：" + dt, e);
-                            continue;
-                        }
-                        FundStockPO po = new FundStockPO(code, planDate);
-
-                        // 持仓股票
-                        Element table = ele.select("table.w782").get(0).select("tbody").first();
-                        for (Element tr : table.getElementsByTag("tr")) {
-                            po.setStockCode(tr.children().get(1).text());
-                            po.setStockName(tr.children().get(2).text());
-                            if (isLatest) {
-                                po.setJzhRate(Float.valueOf(tr.children().get(6).text().replace("%", "")));
-                                try {
-                                    po.setStocks(NumberFormat.getInstance().parse(tr.children().get(7).text()).floatValue());
-                                    po.setValues(NumberFormat.getInstance().parse(tr.children().get(8).text()).floatValue());
-                                } catch (ParseException e) {
-                                    log.error("持股数、持仓市值解析出错：" + tr.text(), e);
-                                    po.setStocks(0);
-                                    po.setValues(0);
-                                }
-                            } else {
-                                po.setJzhRate(Float.valueOf(tr.children().get(4).text().replace("%", "")));
-                                try {
-                                    po.setStocks(NumberFormat.getInstance().parse(tr.children().get(5).text()).floatValue());
-                                    po.setValues(NumberFormat.getInstance().parse(tr.children().get(6).text()).floatValue());
-                                } catch (ParseException e) {
-                                    log.error("持股数、持仓市值解析出错：" + tr.text(), e);
-                                    po.setStocks(0);
-                                    po.setValues(0);
-                                }
-                            }
-                            log.info("股票持仓：{}", JSONUtil.json(po));
-                        }
-                        isLatest = false;
-                    }
-                } else {
-                    log.error("获取基金持仓历史失败：{}", url);
-                }
+            // 先获取历史年度
+            JSONArray years;
+            String url = MessageFormat.format(FundConfig.FUND_STOCK, code, "");
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                years = json.getJSONArray("arryear");
+            } else {
+                log.error("获取基金持仓历史年度失败：{}", url);
+                return;
             }
-        } else {
-            log.info("基金无股票持仓：{}", code);
+
+            if (years != null && years.size() > 0) {
+                // 按年度抓取
+                for (int i = 0; i < years.size(); i++) {
+                    url = MessageFormat.format(FundConfig.FUND_STOCK, code, String.valueOf(years.getIntValue(i)));
+                    res = Unirest.get(url).asString();
+                    if (res.isSuccess()) {
+                        log.info("基金股票持仓：{}", code);
+                        JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                        String content = json.getString("content");
+                        Document html = Jsoup.parse(content);
+
+                        // 解析每季度持仓
+                        Elements elements = html.getElementsByClass("boxitem");
+                        for (Element ele : elements) {
+                            // 持仓方案时间
+                            String dt = ele.select("font.px12").get(0).text();
+                            Date planDate;
+                            try {
+                                planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
+                            } catch (ParseException e) {
+                                log.error("持仓方案时间解析出错：" + dt, e);
+                                continue;
+                            }
+                            FundStockPO po = new FundStockPO(code, planDate);
+
+                            // 持仓股票
+                            Element table = ele.select("table.w782").get(0).select("tbody").first();
+                            for (Element tr : table.getElementsByTag("tr")) {
+                                po.setStockCode(tr.children().get(1).text());
+                                po.setStockName(tr.children().get(2).text());
+                                if (tr.children().size()>7) {
+                                    String tmp = tr.children().get(6).text();
+                                    if(tmp.contains("--")){
+                                        po.setValueRate(0);
+                                    }else{
+                                        po.setValueRate(Float.valueOf(tmp.replace("%", "")));
+                                    }
+                                    try {
+                                        po.setStocks(NumberFormat.getInstance().parse(tr.children().get(7).text()).floatValue());
+                                        po.setMarketValue(NumberFormat.getInstance().parse(tr.children().get(8).text()).floatValue());
+                                    } catch (ParseException e) {
+                                        log.error("持股数、持仓市值解析出错：" + tr.text(), e);
+                                        po.setStocks(0);
+                                        po.setMarketValue(0);
+                                    }
+                                } else {
+                                    String tmp = tr.children().get(4).text();
+                                    if(tmp.contains("--")){
+                                        po.setValueRate(0);
+                                    }else{
+                                        po.setValueRate(Float.valueOf(tmp.replace("%", "")));
+                                    }
+                                    try {
+                                        po.setStocks(NumberFormat.getInstance().parse(tr.children().get(5).text()).floatValue());
+                                        po.setMarketValue(NumberFormat.getInstance().parse(tr.children().get(6).text()).floatValue());
+                                    } catch (ParseException e) {
+                                        log.error("持股数、持仓市值解析出错：" + tr.text(), e);
+                                        po.setStocks(0);
+                                        po.setMarketValue(0);
+                                    }
+                                }
+                                log.info("股票持仓：{}", JSONUtil.json(po));
+
+                                // 入库
+                                FundStock fs = CopyUtils.copy(po, FundStock.class);
+                                int rows = fundStockMapper.insert(fs);
+                                log.info("insert fund-stock {}", rows);
+                            }
+                        }
+                    } else {
+                        log.error("获取基金持仓历史失败：{}", url);
+                    }
+                }
+            } else {
+                log.info("基金无股票持仓：{}", code);
+            }
         }
     }
 
@@ -192,65 +226,89 @@ public class FetchFundTest extends SuperTest {
     public void testZqcc() {
         log.info("测试：债券持仓");
 
-        String code = "160632";
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(null);
 
-        // 先获取历史年度
-        JSONArray years;
-        String url = MessageFormat.format(FundConfig.FUND_BOND, code, "", String.valueOf(FundConfig.RANDOM.nextDouble()));
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
-            years = json.getJSONArray("arryear");
-        } else {
-            log.error("获取债券持仓历史年度失败：{}", url);
-            return;
+        List<FundBond> fsList = fundBondMapper.selectList(new QueryWrapper<FundBond>().select("code"));
+        if(!CollectionUtils.isEmpty(fsList)){
+            Set<String> fundCodes = fsList.parallelStream().map(FundBond::getCode).collect(Collectors.toSet());
+            fundList= fundList.stream().filter(f->!fundCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
-        if (years != null && years.size() > 0) {
-            // 按年度抓取
-            for (int i = 0; i < years.size(); i++) {
-                url = MessageFormat.format(FundConfig.FUND_BOND, code, String.valueOf(years.getIntValue(i)), String.valueOf(FundConfig.RANDOM.nextDouble()));
-                res = Unirest.get(url).asString();
-                if (res.isSuccess()) {
-                    JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
-                    String content = json.getString("content");
-                    Document html = Jsoup.parse(content);
+        // 遍历抓取
+        for (Fund item : fundList) {
+            String code = item.getCode();
 
-                    // 解析每季度持仓
-                    Elements elements = html.getElementsByClass("boxitem");
-                    for (Element ele : elements) {
-                        // 持仓方案时间
-                        String dt = ele.select("font.px12").get(0).text();
-                        Date planDate;
-                        try {
-                            planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
-                        } catch (ParseException e) {
-                            log.error("持仓方案时间解析出错：" + dt, e);
-                            continue;
-                        }
-                        FundBondPO po = new FundBondPO(code, planDate);
-
-                        // 持仓债券
-                        Element table = ele.select("table.w782").get(0).select("tbody").first();
-                        for (Element tr : table.getElementsByTag("tr")) {
-                            po.setBondCode(tr.children().get(1).text());
-                            po.setBondName(tr.children().get(2).text());
-                            po.setJzhRate(Float.valueOf(tr.children().get(3).text().replace("%", "")));
-                            try {
-                                po.setValues(NumberFormat.getInstance().parse(tr.children().get(4).text()).floatValue());
-                            } catch (ParseException e) {
-                                log.error("持仓市值解析出错：" + tr.text(), e);
-                                po.setValues(0);
-                            }
-                            log.info("债券持仓：{}", JSONUtil.json(po));
-                        }
-                    }
-                } else {
-                    log.error("获取债券持仓历史失败：{}", url);
-                }
+            // 先获取历史年度
+            JSONArray years;
+            String url = MessageFormat.format(FundConfig.FUND_BOND, code, "", String.valueOf(FundConfig.RANDOM.nextDouble()));
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                years = json.getJSONArray("arryear");
+            } else {
+                log.error("获取债券持仓历史年度失败：{}", url);
+                return;
             }
-        } else {
-            log.info("基金无债券持仓：{}", code);
+
+            if (years != null && years.size() > 0) {
+                // 按年度抓取
+                for (int i = 0; i < years.size(); i++) {
+                    url = MessageFormat.format(FundConfig.FUND_BOND, code, String.valueOf(years.getIntValue(i)), String.valueOf(FundConfig.RANDOM.nextDouble()));
+                    res = Unirest.get(url).asString();
+                    if (res.isSuccess()) {
+                        log.info("基金债券持仓：{}", code);
+                        JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
+                        String content = json.getString("content");
+                        Document html = Jsoup.parse(content);
+
+                        // 解析每季度持仓
+                        Elements elements = html.getElementsByClass("boxitem");
+                        for (Element ele : elements) {
+                            // 持仓方案时间
+                            String dt = ele.select("font.px12").get(0).text();
+                            Date planDate;
+                            try {
+                                planDate = DateUtils.parseDate(dt, "yyyy-MM-dd");
+                            } catch (ParseException e) {
+                                log.error("持仓方案时间解析出错：" + dt, e);
+                                continue;
+                            }
+                            FundBondPO po = new FundBondPO(code, planDate);
+
+                            // 持仓债券
+                            Element table = ele.select("table.w782").get(0).select("tbody").first();
+                            for (Element tr : table.getElementsByTag("tr")) {
+                                po.setBondCode(tr.children().get(1).text());
+                                po.setBondName(tr.children().get(2).text());
+                                String tmp = tr.children().get(3).text();
+                                if(tmp.contains("--")){
+                                    po.setValueRate(0);
+                                }else {
+                                    po.setValueRate(Float.valueOf(tmp.replace("%", "")));
+                                }
+
+                                try {
+                                    po.setMarketValue(NumberFormat.getInstance().parse(tr.children().get(4).text()).floatValue());
+                                } catch (ParseException e) {
+                                    log.error("持仓市值解析出错：" + tr.text(), e);
+                                    po.setMarketValue(0);
+                                }
+                                log.info("债券持仓：{}", JSONUtil.json(po));
+
+                                // 入库
+                                FundBond fb = CopyUtils.copy(po, FundBond.class);
+                                int rows = fundBondMapper.insert(fb);
+                                log.info("insert fund-bond {}", rows);
+                            }
+                        }
+                    } else {
+                        log.error("获取债券持仓历史失败：{}", url);
+                    }
+                }
+            } else {
+                log.info("基金无债券持仓：{}", code);
+            }
         }
     }
 
@@ -398,43 +456,61 @@ public class FetchFundTest extends SuperTest {
         Unirest.config().addDefaultHeader("Referer", FundConfig.HOST_INFO);
         Unirest.config().addDefaultHeader("Host", FundConfig.HOST_API);
 
-        String code = "006341";
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(new QueryWrapper<Fund>().select("code"));
+        List<String> fundCodes = fundList.parallelStream().map(Fund::getCode).collect(Collectors.toList());
 
-        int pageIndex = 1;
-        int pageTotal = 1;
-        String jq = new StringBuilder("jQuery").append(IdWorker.getIdStr()).append("1_")
-                .append(String.valueOf(System.currentTimeMillis())).toString();
-        List<FundJzhPO> jzhList = new ArrayList<>();
-        for (; pageIndex <= pageTotal; pageIndex++) {
+        // 遍历抓取
+        for (String code : fundCodes) {
+            int fvSize = fundValMapper.selectCount(new QueryWrapper<FundVal>().eq("code", code));
+            if(fvSize>0){
+                log.info("基金净值已抓取：{} {}", code, fvSize);
+                continue;
+            }
+
             // 分页抓取
-            String url = MessageFormat.format(FundConfig.FUND_JZ_XHR, jq, code, pageIndex, String.valueOf(System.currentTimeMillis()));
-            HttpResponse<String> res = Unirest.get(url).asString();
-            if (res.isSuccess()) {
-                String json = FundConfig.pickXhrData(res.getBody());
-                JzhResponse resObj = JSONObject.parseObject(json, JzhResponse.class);
-                if (resObj.isSuccess()) {
-                    // 计算总页数
-                    pageTotal = resObj.getPageTotal();
+            int pageIndex = 1;
+            int pageTotal = 1;
+            String jq = new StringBuilder("jQuery").append(IdWorker.getIdStr()).append("1_")
+                    .append(String.valueOf(System.currentTimeMillis())).toString();
+            List<FundJzhPO> jzhList = new ArrayList<>();
+            for (; pageIndex <= pageTotal; pageIndex++) {
+                String url = MessageFormat.format(FundConfig.FUND_JZ_XHR, jq, code, pageIndex, String.valueOf(System.currentTimeMillis()));
+                HttpResponse<String> res = Unirest.get(url).asString();
+                if (res.isSuccess()) {
+                    String json = FundConfig.pickXhrData(res.getBody());
+                    JzhResponse resObj = JSONObject.parseObject(json, JzhResponse.class);
+                    if (resObj.isSuccess()) {
+                        // 计算总页数
+                        pageTotal = resObj.getPageTotal();
 
-                    JzhData resData = resObj.getData();
-                    if (!CollectionUtils.isEmpty(resData.getList())) {
-                        for (JzhItem item : resData.getList()) {
-                            FundJzhPO jzh = new FundJzhPO(code, item);
-                            log.info("净值-{}/{}：{}", pageIndex, pageTotal, JSONUtil.json(jzh));
-                            jzhList.add(jzh);
+                        JzhData resData = resObj.getData();
+                        if (!CollectionUtils.isEmpty(resData.getList())) {
+                            for (JzhItem item : resData.getList()) {
+                                FundJzhPO jzh = new FundJzhPO(code, item);
+                                log.info("净值-{}/{}：{}", pageIndex, pageTotal, JSONUtil.json(jzh));
+                                jzhList.add(jzh);
+                            }
+                            try {
+                                Thread.sleep(Math.min(100, FundConfig.RANDOM.nextInt(1000)));
+                            } catch (InterruptedException e) {
+                                log.error("分页sleep异常：", e);
+                            }
                         }
-                        try {
-                            Thread.sleep(Math.min(100, FundConfig.RANDOM.nextInt(1000)));
-                        } catch (InterruptedException e) {
-                            log.error("分页sleep异常：", e);
-                        }
+                    } else {
+                        log.error("抓取结果异常：{}, {}, {}", code, pageIndex, resObj.getMsg());
+                        continue;
                     }
                 } else {
-                    log.error("抓取结果异常：{}, {}, {}", code, pageIndex, resObj.getMsg());
-                    continue;
+                    log.error("分页抓取失败：{}, {}", code, pageIndex);
                 }
-            } else {
-                log.error("分页抓取失败：{}, {}", code, pageIndex);
+            }
+
+            // 入库
+            List<FundVal> fvList = CopyUtils.copy(jzhList, FundVal.class);
+            for (FundVal fv : fvList) {
+                int rows = fundValMapper.insert(fv);
+                log.info("insert fund-val {}", rows);
             }
         }
     }
@@ -522,42 +598,65 @@ public class FetchFundTest extends SuperTest {
     public void testJjjl() {
         log.info("测试：基金经理");
 
-        String code = "006327";
-        String url = MessageFormat.format(FundConfig.FUND_JL, code);
+        // 加载基金列表
+        List<Fund> fundList = fundMapper.selectList(null);
 
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            Document html = Jsoup.parse(res.getBody());
-            Elements trs = html.selectFirst("div.boxitem").selectFirst("tbody").getElementsByTag("tr");
-            for (Element tr : trs) {
-                // 解析管理时间
-                Date start = null, end = null;
-                String tmp = tr.child(0).text();
-                try {
-                    start = DateUtils.parseDate(tmp, "yyyy-MM-dd");
-                } catch (ParseException e) {
-                    log.error("基金经理-起始期解析出错：" + tmp, e);
-                }
-                tmp = tr.child(1).text();
-                if (!"至今".equals(tmp)) {
+        // 过滤已抓取
+        List<FundManager> fmList = fundManagerMapper.selectList(null);
+        if(!CollectionUtils.isEmpty(fmList)){
+            Set<String> dbFundCodes = fmList.stream().map(FundManager::getCode).collect(Collectors.toSet());
+            fundList = fundList.stream().filter(f->!dbFundCodes.contains(f.getCode())).collect(Collectors.toList());
+        }
+
+        // 遍历基金
+        for (Fund item : fundList) {
+            String code = item.getCode();
+            String url = MessageFormat.format(FundConfig.FUND_JL, code);
+            log.info("抓取基金经理变动信息：{}", code);
+
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                Document html = Jsoup.parse(res.getBody());
+                Elements trs = html.selectFirst("div.boxitem").selectFirst("tbody").getElementsByTag("tr");
+                List<FundManagerPO> poList = new ArrayList<>(trs.size());
+                for (Element tr : trs) {
+                    // 解析管理时间
+                    Date start = null, end = null;
+                    String tmp = tr.child(0).text();
                     try {
-                        end = DateUtils.parseDate(tmp, "yyyy-MM-dd");
+                        start = DateUtils.parseDate(tmp, "yyyy-MM-dd");
                     } catch (ParseException e) {
-                        log.error("基金经理-截止期解析出错：" + tmp, e);
+                        log.error("基金经理-起始期解析出错：" + tmp, e);
+                    }
+                    tmp = tr.child(1).text();
+                    if (!"至今".equals(tmp)) {
+                        try {
+                            end = DateUtils.parseDate(tmp, "yyyy-MM-dd");
+                        } catch (ParseException e) {
+                            log.error("基金经理-截止期解析出错：" + tmp, e);
+                        }
+                    }
+
+                    // 解析管理期基金经理
+                    Elements as = tr.child(2).getElementsByTag("a");
+                    for (Element a : as) {
+                        FundManagerPO po = new FundManagerPO(code, start, end);
+                        po.setManagerName(a.text());
+                        po.setManagerCode(FundConfig.pickCode(a.attr("href"), FundConfig.MANAGER_REG));
+                        log.info("基金经理：{}", JSONUtil.json(po));
+                        poList.add(po);
                     }
                 }
 
-                // 解析管理期基金经理
-                Elements as = tr.child(2).getElementsByTag("a");
-                for (Element a : as) {
-                    FundManagerPO po = new FundManagerPO(code, start, end);
-                    po.setManagerName(a.text());
-                    po.setManagerCode(FundConfig.pickCode(a.attr("href"), FundConfig.MANAGER_REG));
-                    log.info("基金经理：{}", JSONUtil.json(po));
+                // 入库
+                List<FundManager> fmHisList = CopyUtils.copy(poList, FundManager.class);
+                for (FundManager fm : fmHisList) {
+                    int rows = fundManagerMapper.insert(fm);
+                    log.info("insert fund-manager {}", rows);
                 }
+            } else {
+                log.error("基金经理数据抓取失败：{}，{}", code, url);
             }
-        } else {
-            log.error("基金经理数据抓取失败：{}，{}", code, url);
         }
     }
 
@@ -565,42 +664,66 @@ public class FetchFundTest extends SuperTest {
     public void testJjgs() {
         log.info("测试：基金公司");
 
-        String code = "80000229";
-        String url = MessageFormat.format(FundConfig.COMPANY_GK, code);
+        // 加载基金公司列表
+        List<Fund> fundList = fundMapper.selectList(null);
+        Set<String> cmpCodes = fundList.stream().map(Fund::getCompanyCode).collect(Collectors.toSet());
 
-        HttpResponse<String> res = Unirest.get(url).asString();
-        if (res.isSuccess()) {
-            Document html = Jsoup.parse(res.getBody());
+        // 过滤已抓取
+        List<Company> companyList = companyMapper.selectList(null);
+        if(!CollectionUtils.isEmpty(companyList)) {
+            List<String> dbCmpCodes = companyList.stream().map(Company::getCode).collect(Collectors.toList());
+            cmpCodes.removeAll(dbCmpCodes);
+        }
+        Date now = new Date();
 
-            Elements trs = html.selectFirst("table.category-list").getElementsByTag("tr");
-            // 公司名称
-            String name = trs.get(0).child(1).text();
-            FundCompanyPO po = new FundCompanyPO(code, name);
+        // 遍历抓取
+        for (String code : cmpCodes) {
+            // String code = "80000229";
+            String url = MessageFormat.format(FundConfig.COMPANY_GK, code);
+            log.info("抓取基金公司：{}", code);
+            HttpResponse<String> res = Unirest.get(url).asString();
+            if (res.isSuccess()) {
+                Document html = Jsoup.parse(res.getBody());
 
-            // 成立日期
-            String tmp = trs.get(3).child(1).text();
-            try {
-                po.setSetupDate(DateUtils.parseDate(tmp, "yyyy-MM-dd"));
-            } catch (ParseException e) {
-                log.error("基金公司-成立日期解析失败：" + code, e);
+                Elements trs = html.selectFirst("table.category-list").getElementsByTag("tr");
+                // 公司名称
+                String name = trs.get(0).child(1).text();
+                FundCompanyPO po = new FundCompanyPO(code, name);
+
+                // 成立日期
+                String tmp = trs.get(3).child(1).text();
+                try {
+                    po.setSetupDate(DateUtils.parseDate(tmp, "yyyy-MM-dd"));
+                } catch (ParseException e) {
+                    log.error("基金公司-成立日期解析失败：" + code, e);
+                }
+
+                // 注册地址
+                po.setRegAddress(trs.get(5).child(1).text());
+
+                // 管理基金数量
+                tmp = trs.get(11).child(1).getElementsByTag("a").first().text();
+                po.setFundTotal(Integer.valueOf(tmp));
+
+                // 基金经理人数
+                tmp = trs.get(12).child(1).text();
+                if(tmp.contains("--")){
+                    po.setFundGm(0);
+                }else {
+                    po.setFundGm(Float.valueOf(tmp.replace("亿元", "")));
+                }
+                tmp = trs.get(12).child(3).text();
+                po.setManagerTotal(Integer.valueOf(tmp.replace("人", "")));
+                log.info("基金公司：{}", JSONUtil.json(po));
+
+                // 入库
+                Company cmp = CopyUtils.copy(po,Company.class);
+                cmp.setSynTime(now);
+                int rows = companyMapper.insert(cmp);
+                log.info("insert company {}", rows);
+            } else {
+                log.error("基金公司数据抓取失败：{}，{}", code, url);
             }
-
-            // 注册地址
-            po.setRegAddress(trs.get(5).child(1).text());
-
-            // 管理基金数量
-            tmp = trs.get(11).child(1).getElementsByTag("a").first().text();
-            po.setFundTotal(Integer.valueOf(tmp));
-
-            // 基金经理人数
-            tmp = trs.get(12).child(1).text();
-            po.setFundScale(Float.valueOf(tmp.replace("亿元", "")));
-            tmp = trs.get(12).child(3).text();
-            po.setManagerTotal(Integer.valueOf(tmp.replace("人", "")));
-
-            log.info("基金公司：{}", JSONUtil.json(po));
-        } else {
-            log.error("基金公司数据抓取失败：{}，{}", code, url);
         }
     }
 

@@ -29,7 +29,7 @@ public class FundStockPO {
     /**
      * 占净值比例
      */
-    private float jzhRate;
+    private float valueRate;
     /**
      * 持股数（万股）
      */
@@ -37,7 +37,7 @@ public class FundStockPO {
     /**
      * 持仓市值（万元）
      */
-    private float values;
+    private float marketValue;
 
 
     public FundStockPO(String code, Date dt) {

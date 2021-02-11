@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * <p>
@@ -38,7 +39,7 @@ public class FundVal implements Serializable {
     /**
      * 净值日期
      */
-    private LocalDate dt;
+    private Date dt;
 
     /**
      * 单位净值
@@ -54,8 +55,6 @@ public class FundVal implements Serializable {
      * 日涨幅
      */
     private Float dayGrowth;
-
-    private LocalDateTime createTime;
 
 
 }

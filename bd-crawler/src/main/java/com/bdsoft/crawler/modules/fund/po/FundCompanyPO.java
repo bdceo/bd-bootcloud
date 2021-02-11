@@ -35,7 +35,7 @@ public class FundCompanyPO {
     /**
      * 管理规模：亿元
      */
-    private float fundScale;
+    private float fundGm;
 
     public FundCompanyPO() {
     }

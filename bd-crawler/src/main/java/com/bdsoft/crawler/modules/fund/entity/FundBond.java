@@ -58,7 +58,7 @@ public class FundBond implements Serializable {
     /**
      * 持仓市值（万元）
      */
-    private Float values;
+    private Float marketValue;
 
 
 }
