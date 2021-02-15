@@ -26,7 +26,7 @@ public class FundInfoPO {
     /**
      * 投资范围
      */
-    private String range;
+    private String scope;
 
     /**
      * 投资策略
@@ -38,5 +38,10 @@ public class FundInfoPO {
      */
     private String bonus;
 
+    public FundInfoPO() {
+    }
 
+    public FundInfoPO(String code) {
+        this.code = code;
+    }
 }

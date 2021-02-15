@@ -41,7 +41,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class FetchFundTest extends SuperTest {
+public class
+
+FetchFundTest extends SuperTest {
 
     @Autowired
     private FundMapper fundMapper;
@@ -321,10 +323,10 @@ public class FetchFundTest extends SuperTest {
         List<Fund> fundList = fundMapper.selectList(null);
 
         // 过滤已抓取
-        List<FundFee> feeList = fundFeeMapper.selectList(null);
-        if (!CollectionUtils.isEmpty(feeList)) {
-            List<String> codeList = feeList.stream().map(FundFee::getCode).collect(Collectors.toList());
-            fundList = fundList.stream().filter(f -> !codeList.contains(f.getCode())).collect(Collectors.toList());
+        List<FundInfo> fiList = fundInfoMapper.selectList(new QueryWrapper<FundInfo>().select("code"));
+        if(!CollectionUtils.isEmpty(fiList)) {
+             List<String> dbCodes = fiList.parallelStream().map(FundInfo::getCode).collect(Collectors.toList());
+             fundList = fundList.parallelStream().filter(f->!dbCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
         for (Fund item : fundList) {
@@ -332,12 +334,13 @@ public class FetchFundTest extends SuperTest {
             String url = MessageFormat.format(FundConfig.FUND_GK, code);
             FundPO fund = new FundPO(code);
             FundFeePO fee = new FundFeePO(code);
+            FundInfoPO info = new FundInfoPO(code);
 
             HttpResponse<String> res = Unirest.get(url).asString();
             if (res.isSuccess()) {
                 Document html = Jsoup.parse(res.getBody());
 
-                // 基金概况
+                // 基本概况
                 Element tableEle = html.getElementsByClass("info").get(0);
                 Elements trs = tableEle.getElementsByTag("tr");
 
@@ -441,9 +444,49 @@ public class FetchFundTest extends SuperTest {
                 }
                 log.info("手续费：{}", JSONUtil.json(fee));
 
+                // 入库：手续费
                 FundFee fundFee = CopyUtils.copy(fee, FundFee.class);
-                rows = fundFeeMapper.insert(fundFee);
-                log.info("insert fee {}", rows);
+                FundFee dbFee = fundFeeMapper.selectOne(new QueryWrapper<FundFee>().eq("code", code));
+                if(dbFee!=null){
+                    fundFee.setId(dbFee.getId());
+                    rows = fundFeeMapper.updateById(fundFee);
+                    log.info("update fee {}", rows);
+                }else{
+                    rows = fundFeeMapper.insert(fundFee);
+                    log.info("insert fee {}", rows);
+                }
+
+                // 基金概况：投资目标、投资理念、投资范围、投资策略、分红政策
+                Elements boxItems  = html.getElementsByClass("boxitem");
+                for (Element ele : boxItems) {
+                    String title = ele.selectFirst("h4.t").text();
+                    if(ele.selectFirst("p")!=null){
+                        String content = ele.selectFirst("p").text();
+                        if("投资目标".equals(title)){
+                            info.setTarget(content);
+                        }else if ("投资理念".equals(title)){
+                            info.setIdea(content);
+                        }else if ("投资范围".equals(title)){
+                            info.setScope(content);
+                        }else if ("投资策略".equals(title)){
+                            info.setStrategy(content);
+                        }else if ("分红政策".equals(title)){
+                            info.setBonus(content);
+                        }
+                    }
+                }
+
+                // 入库：基金概况
+                FundInfo fundInfo = CopyUtils.copy(info, FundInfo.class);
+                FundInfo dbFi = fundInfoMapper.selectOne(new QueryWrapper<FundInfo>().eq("code", code));
+                if(dbFi!=null){
+                    fundInfo.setId(dbFi.getId());
+                    rows = fundInfoMapper.updateById(fundInfo);
+                    log.info("update info {}", rows);
+                }else{
+                    rows = fundInfoMapper.insert(fundInfo);
+                    log.info("insert info {}", rows);
+                }
             } else {
                 log.error("基金概况信息抓取失败：{}，{}", code, url);
             }

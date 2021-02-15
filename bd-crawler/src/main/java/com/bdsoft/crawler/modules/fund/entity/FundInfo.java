@@ -46,7 +46,7 @@ public class FundInfo implements Serializable {
     /**
      * 投资范围
      */
-    private String range;
+    private String scope;
 
     /**
      * 投资策略
