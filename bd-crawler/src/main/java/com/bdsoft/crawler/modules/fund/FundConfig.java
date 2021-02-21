@@ -22,7 +22,10 @@ public class FundConfig {
     // 基金排行：页码、随机串
     public static final String FUND_RANK_HOST = "fund.eastmoney.com";
     public static final String FUND_RANK_REFER="http://fund.eastmoney.com/data/fundranking.html";
-    public static final String FUND_RANK="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=lnzf&st=desc&pi={0}&pn=50&dx=0&v={1}";
+    // 开放基金排名
+    public static final String FUND_KF_RANK="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=lnzf&st=desc&pi={0}&pn=50&dx=0&v={1}";
+    // 场内基金排名
+    public static final String FUND_FB_RANK="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=fb&ft=ct&rs=&gs=0&sc=zzf&st=desc&pi={0}&pn=50&dx=0&v={1}";
 
     // 基金公司：代码
     public static String COMPANY_INDEX = HOST + "company/{0}.html";

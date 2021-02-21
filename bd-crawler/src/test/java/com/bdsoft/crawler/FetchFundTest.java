@@ -70,9 +70,13 @@ FetchFundTest extends SuperTest {
         Unirest.config().addDefaultHeader("Referer", FundConfig.FUND_RANK_REFER);
         Unirest.config().addDefaultHeader("Host", FundConfig.FUND_RANK_HOST);
 
+        // 抓取指定排行榜
+//        String fetchRank = FundConfig.FUND_KF_RANK;
+        String fetchRank = FundConfig.FUND_FB_RANK;
+
         // 获取总页数
         int pageTotal;
-        String url = MessageFormat.format(FundConfig.FUND_RANK, 1, String.valueOf(FundConfig.RANDOM.nextDouble()));
+        String url = MessageFormat.format(fetchRank, 1, String.valueOf(FundConfig.RANDOM.nextDouble()));
         HttpResponse<String> res = Unirest.get(url).asString();
         if (res.isSuccess()) {
             JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
@@ -86,7 +90,7 @@ FetchFundTest extends SuperTest {
         Date now = new Date();
         // 分页获取
         for (int pageIndex = 1; pageIndex <= pageTotal; pageIndex++) {
-            url = MessageFormat.format(FundConfig.FUND_RANK, pageIndex, String.valueOf(FundConfig.RANDOM.nextDouble()));
+            url = MessageFormat.format(fetchRank, pageIndex, String.valueOf(FundConfig.RANDOM.nextDouble()));
             res = Unirest.get(url).asString();
             if (res.isSuccess()) {
                 JSONObject json = JSON.parseObject(FundConfig.pickJsJson(res.getBody()));
@@ -98,16 +102,13 @@ FetchFundTest extends SuperTest {
                     log.info("基金base={}", JSONUtil.json(po));
 
                     // 入库
-                    Fund fund = CopyUtils.copy(po, Fund.class);
-                    fund.setSynTime(now);
-                    int rows = fundMapper.insert(fund);
-                    log.info("insert {}", rows);
-                }
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Fund dbFund = fundMapper.selectOne(new QueryWrapper<Fund>().eq("code", po.getCode()));
+                    if(dbFund == null) {
+                        Fund fund = CopyUtils.copy(po, Fund.class);
+                        fund.setSynTime(now);
+                        int rows = fundMapper.insert(fund);
+                        log.info("insert fund {}", rows);
+                    }
                 }
             } else {
                 log.error("获取基金排行失败：{}-{}", pageIndex, url);
