@@ -16,6 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -29,6 +31,32 @@ public class FundValTest {
     @Autowired
     private FundValMapper fundValMapper;
 
+
+    @Test
+    public void testDayGrowth2() throws Exception {
+        ZoneId zoneId = ZoneId.systemDefault();
+        DayGrowthStat stat = new DayGrowthStat();
+
+        int pageSize = 100_0000;
+        int totalCount = fundValMapper.selectCount(null);
+        int pageTotal = totalCount / pageSize + 1;
+
+        for (int pageIndex = 1; pageIndex <= pageTotal; pageIndex++) {
+            Page<FundVal> page = new Page<>(pageIndex, pageSize);
+            QueryWrapper<FundVal> query = new QueryWrapper<FundVal>().select("id", "dt", "day_growth").orderByAsc("id");
+            IPage<FundVal> pageData = fundValMapper.selectPage(page, query);
+
+            log.info("基于历史净值数据统计每周涨跌: {}/{}", pageIndex, pageTotal);
+            for (FundVal val : pageData.getRecords()) {
+                LocalDate dt = val.getDt().toInstant().atZone(zoneId).toLocalDate();
+                stat.stat(dt.getDayOfWeek().getValue(), val.getDayGrowth() >= 0);
+            }
+        }
+
+        log.info(stat.view());
+    }
+
+
     @Test
     public void testDayGrowth() throws Exception {
         DayGrowthStat stat = new DayGrowthStat();
@@ -37,10 +65,49 @@ public class FundValTest {
         int totalCount = fundValMapper.selectCount(null);
         int pageTotal = totalCount / pageSize + 1;
 
+        int taskSize = 10;
+        int perTaskPage = pageTotal / 10;
+        CountDownLatch latch = new CountDownLatch(taskSize);
 
+        ExecutorService es = Executors.newCachedThreadPool();
+        es.submit(new ViewReduce(latch, stat));
 
+        for (int i = 1; i <= taskSize; i++) {
+            int start = (i - 1) * perTaskPage + 1;
+            int end = i * perTaskPage;
+            if (i == taskSize) {
+                end = pageTotal;
+            }
+            log.info("{} - {}", start, end);
+            es.execute(new StatMap(stat, latch, start, end, fundValMapper));
+        }
+
+        es.shutdown();
     }
 
+}
+
+@Slf4j
+class ViewReduce implements Runnable {
+
+    private CountDownLatch latch;
+
+    private DayGrowthStat stat;
+
+    public ViewReduce(CountDownLatch latch, DayGrowthStat stat) {
+        this.latch = latch;
+        this.stat = stat;
+    }
+
+    @Override
+    public void run() {
+        try {
+            latch.await();
+            log.info(stat.view());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 @Slf4j
@@ -128,16 +195,16 @@ class StatMap implements Runnable {
 @Data
 class DayGrowthStat {
 
-    private AtomicInteger zh1Up;
-    private AtomicInteger zh1Down;
-    private AtomicInteger zh2Up;
-    private AtomicInteger zh2Down;
-    private AtomicInteger zh3Up;
-    private AtomicInteger zh3Down;
-    private AtomicInteger zh4Up;
-    private AtomicInteger zh4Down;
-    private AtomicInteger zh5Up;
-    private AtomicInteger zh5Down;
+    private AtomicInteger zh1Up = new AtomicInteger(0);
+    private AtomicInteger zh1Down = new AtomicInteger(0);
+    private AtomicInteger zh2Up = new AtomicInteger(0);
+    private AtomicInteger zh2Down = new AtomicInteger(0);
+    private AtomicInteger zh3Up = new AtomicInteger(0);
+    private AtomicInteger zh3Down = new AtomicInteger(0);
+    private AtomicInteger zh4Up = new AtomicInteger(0);
+    private AtomicInteger zh4Down = new AtomicInteger(0);
+    private AtomicInteger zh5Up = new AtomicInteger(0);
+    private AtomicInteger zh5Down = new AtomicInteger(0);
 
     public String view() {
         int total = zh1Up.intValue() + zh1Down.intValue() + zh2Up.intValue() + zh2Down.intValue() + zh3Up.intValue()
@@ -149,6 +216,46 @@ class DayGrowthStat {
         str.append("\t周四上涨概率：").append(zh4Up.intValue() * 100 / total).append("%").append(", 下跌概率：").append(zh4Down.intValue() * 100 / total).append("%\n");
         str.append("\t周五上涨概率：").append(zh5Up.intValue() * 100 / total).append("%").append(", 下跌概率：").append(zh5Down.intValue() * 100 / total).append("%");
         return str.toString();
+    }
+
+    public void stat(int dayOfWeek, boolean isUp) {
+        switch (dayOfWeek) {
+            case 1:
+                if (isUp) {
+                    this.getZh1Up().incrementAndGet();
+                } else {
+                    this.getZh1Down().incrementAndGet();
+                }
+                break;
+            case 2:
+                if (isUp) {
+                    this.getZh2Up().incrementAndGet();
+                } else {
+                    this.getZh2Down().incrementAndGet();
+                }
+                break;
+            case 3:
+                if (isUp) {
+                    this.getZh3Up().incrementAndGet();
+                } else {
+                    this.getZh3Down().incrementAndGet();
+                }
+                break;
+            case 4:
+                if (isUp) {
+                    this.getZh4Up().incrementAndGet();
+                } else {
+                    this.getZh4Down().incrementAndGet();
+                }
+                break;
+            case 5:
+                if (isUp) {
+                    this.getZh5Up().incrementAndGet();
+                } else {
+                    this.getZh5Down().incrementAndGet();
+                }
+                break;
+        }
     }
 
 }
