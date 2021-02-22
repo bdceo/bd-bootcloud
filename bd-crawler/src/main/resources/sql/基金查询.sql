@@ -1,12 +1,5 @@
 
 
-SELECT * FROM t_bs_emp_basic WHERE NAME='赵学中';
-
-SELECT * FROM t_bs_emp_basic WHERE user_id IN(124312793, 124313036)
-
-SELECT * FROM t_bs_emp_service WHERE user_id=124313141 ORDER BY update_time ASC;
-
-
 SELECT * FROM t_index WHERE NAME LIKE 'ESG%'
 
 
@@ -16,7 +9,7 @@ SELECT  id,code,dt,stock_code,stock_name,value_rate,stocks,values  FROM t_fund_s
 SELECT * FROM t_fund_val WHERE CODE='162907';
 
 
-SELECT * FROM t_fund_val ORDER BY id 	
+SELECT id, dt, day_growth FROM t_fund_val LIMIT 1,5000;
 
 
 SELECT * FROM t_fund WHERE CODE='160632';

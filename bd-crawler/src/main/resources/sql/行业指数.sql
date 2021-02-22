@@ -74,6 +74,19 @@ SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.
 	WHERE (f.name LIKE '%工业%' OR f.name LIKE '%制造%' OR f.name LIKE '%高端%')
  	AND f.setup_date<'2019-1-1' AND f.gm>5
 	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
+-- -----------------------------------------------
+
+# 6，互联网
+SELECT * FROM t_index i WHERE (NAME LIKE '%互联%')
+	and EXISTS (SELECT 1 FROM t_index_fund f WHERE f.index_code=i.code);
+	
+SELECT * FROM t_index_fund WHERE index_code IN('399803', '930820', '930850');
+		
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE (f.name LIKE '%互联%' OR f.name LIKE '%中概%')
+ 	AND f.setup_date<'2019-1-1' AND f.gm>5
+	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
 	 
 	
 	
