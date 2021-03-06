@@ -26,8 +26,14 @@ public class SeTest {
         log.info("t={}, st={}", t, System.currentTimeMillis());
 
         log.info("len={}", "18306229061496483879".length());
-        log.info("len={}", (System.currentTimeMillis()+"").length());
+        log.info("len={}", (System.currentTimeMillis() + "").length());
         log.info("len={}", (IdWorker.getIdStr()).length());
+
+        Date dt1 = new Date();
+        Date dt2 = new Date(dt1.getTime() + 3);
+        log.info("dt1 before dt2 {}", dt1.before(dt2));
+        log.info("dt1 before dt2 {}", dt1.after(dt2));
+
 
     }
 }

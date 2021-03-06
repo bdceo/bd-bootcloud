@@ -17,6 +17,7 @@ SELECT * FROM t_fund_ts WHERE CODE='159949';
 
 SELECT * FROM t_company WHERE CODE='80000238';
 
+SELECT MAX(dt) FROM t_fund_val WHERE CODE='159920';
 
 SELECT * FROM t_fund 
 WHERE setup_date IS NOT null
