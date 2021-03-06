@@ -60,3 +60,37 @@ SELECT * FROM t_fund WHERE NAME LIKE '%价值%'
 SELECT * FROM t_fund WHERE NAME LIKE '%价值%'
 	AND gm>5 AND setup_date<'2016-2-20'
 	ORDER BY type, setup_date ASC, gm DESC;
+-- -----------------------------------------------
+
+# 5，成长
+SELECT * FROM t_index i WHERE (NAME LIKE '%成长%')
+	and EXISTS (SELECT 1 FROM t_index_fund f WHERE f.index_code=i.code);
+
+SELECT * FROM t_index_fund WHERE index_code IN('931157');
+ 
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index 
+	FROM t_fund f
+	LEFT JOIN t_fund_info i ON i.code=f.code
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	LEFT JOIN t_company c ON f.company_code=c.code
+	WHERE f.NAME LIKE '%成长%' 
+	AND i.target LIKE '%成长%'
+	AND c.fund_gm>1000
+	AND f.gm>5 AND f.setup_date<'2016-2-20'
+	ORDER BY f.TYPE, f.setup_date ASC, f.gm DESC;
+
+-- -----------------------------------------------
+
+# 6，趋势
+SELECT * FROM t_index i WHERE (NAME LIKE '%趋势%')
+	and EXISTS (SELECT 1 FROM t_index_fund f WHERE f.index_code=i.code);
+ 
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index 
+	FROM t_fund f
+	LEFT JOIN t_fund_info i ON i.code=f.code
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	LEFT JOIN t_company c ON f.company_code=c.code
+	WHERE f.NAME LIKE '%趋势%'
+	AND c.fund_gm>1000
+	AND f.gm>5 AND f.setup_date<'2018-2-20'
+	ORDER BY f.TYPE, f.setup_date ASC, f.gm DESC;

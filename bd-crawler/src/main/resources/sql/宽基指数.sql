@@ -23,6 +23,12 @@ SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
 			AND std_dev1>0 AND std_dev2>0 AND std_dev3>0)
 	AND f.setup_date<'2016-12-31' AND f.gm>10
 	ORDER BY f.setup_date ASC, f.gm DESC;
+
+SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE f.NAME LIKE '%创业板%' 
+	AND f.setup_date<'2018-12-31' AND f.gm>5
+	ORDER BY f.TYPE, f.setup_date ASC, f.gm DESC;
 -- -----------------------------------------------	
 
 
@@ -43,11 +49,8 @@ SELECT * FROM t_fund_ts
 # 对应产品：成立时间、基金规模
 SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
 	LEFT JOIN t_fund_ts ts ON f.code=ts.code
-	WHERE f.CODE IN (
-		SELECT code FROM t_fund_ts 
-			WHERE track_index LIKE '%上证50%' AND track_diff>0 
-			AND std_dev1>0 AND std_dev2>0 AND std_dev3>0)
-	AND f.setup_date<'2015-12-31' AND f.gm>10
+	WHERE f.NAME LIKE '%上证50%' 
+	AND f.setup_date<'2018-12-31' AND f.gm>5
 	ORDER BY f.setup_date ASC, f.gm DESC;
 -- -----------------------------------------------	
 	
@@ -75,6 +78,12 @@ SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
 			AND std_dev1>0 AND std_dev2>0 AND std_dev3>0)
 	AND f.setup_date<'2016-2-20' AND f.gm>20
 	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
+
+SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE f.NAME LIKE '%沪深300%' 
+	AND f.setup_date<'2018-12-31' AND f.gm>5
+	ORDER BY f.TYPE, f.setup_date ASC, f.gm DESC;
 -- -----------------------------------------------
 
 # 4,中证500
@@ -100,8 +109,13 @@ SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
 			AND std_dev1>0 AND std_dev2>0 AND std_dev3>0)
 	AND f.setup_date<'2016-2-20' AND f.gm>20
 	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
--- -----------------------------------------------	
-
+	
+SELECT f.`*`, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE f.NAME LIKE '%中证500%' 
+	AND f.setup_date<'2018-12-31' AND f.gm>5
+	ORDER BY f.TYPE, f.setup_date ASC, f.gm DESC;
+-- -----------------------------------------------
 
 # 5,科创板
 SELECT * FROM t_index i WHERE NAME LIKE '%科创%'; 
