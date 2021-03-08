@@ -60,3 +60,18 @@ SELECT * FROM t_fund WHERE NAME LIKE '%价值%'
 SELECT * FROM t_fund WHERE NAME LIKE '%价值%'
 	AND gm>5 AND setup_date<'2016-2-20'
 	ORDER BY type, setup_date ASC, gm DESC;
+-- -----------------------------------------------
+
+
+# 5，成长
+SELECT * FROM t_index i WHERE (NAME LIKE '%成长%')
+	and EXISTS (SELECT 1 FROM t_index_fund f WHERE f.index_code=i.code);
+
+SELECT * FROM t_index_fund WHERE index_code IN('931157');
+
+SELECT * FROM t_fund WHERE NAME LIKE '%成长%' 
+	ORDER BY gm DESC, TYPE;
+	 
+SELECT * FROM t_fund WHERE NAME LIKE '%成长%'
+	AND gm>5 AND setup_date<'2016-2-20'
+	ORDER BY type, setup_date ASC, gm DESC;
