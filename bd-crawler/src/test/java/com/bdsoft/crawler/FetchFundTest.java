@@ -103,7 +103,7 @@ FetchFundTest extends SuperTest {
 
                     // 入库
                     Fund dbFund = fundMapper.selectOne(new QueryWrapper<Fund>().eq("code", po.getCode()));
-                    if(dbFund == null) {
+                    if (dbFund == null) {
                         Fund fund = CopyUtils.copy(po, Fund.class);
                         fund.setSynTime(now);
                         int rows = fundMapper.insert(fund);
@@ -125,9 +125,9 @@ FetchFundTest extends SuperTest {
         List<Fund> fundList = fundMapper.selectList(null);
 
         List<FundStock> fsList = fundStockMapper.selectList(new QueryWrapper<FundStock>().select("code"));
-        if(!CollectionUtils.isEmpty(fsList)){
+        if (!CollectionUtils.isEmpty(fsList)) {
             Set<String> fundCodes = fsList.parallelStream().map(FundStock::getCode).collect(Collectors.toSet());
-            fundList= fundList.stream().filter(f->!fundCodes.contains(f.getCode())).collect(Collectors.toList());
+            fundList = fundList.stream().filter(f -> !fundCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
         // 遍历抓取
@@ -176,11 +176,11 @@ FetchFundTest extends SuperTest {
                             for (Element tr : table.getElementsByTag("tr")) {
                                 po.setStockCode(tr.children().get(1).text());
                                 po.setStockName(tr.children().get(2).text());
-                                if (tr.children().size()>7) {
+                                if (tr.children().size() > 7) {
                                     String tmp = tr.children().get(6).text();
-                                    if(tmp.contains("--")){
+                                    if (tmp.contains("--")) {
                                         po.setValueRate(0);
-                                    }else{
+                                    } else {
                                         po.setValueRate(Float.valueOf(tmp.replace("%", "")));
                                     }
                                     try {
@@ -193,9 +193,9 @@ FetchFundTest extends SuperTest {
                                     }
                                 } else {
                                     String tmp = tr.children().get(4).text();
-                                    if(tmp.contains("--")){
+                                    if (tmp.contains("--")) {
                                         po.setValueRate(0);
-                                    }else{
+                                    } else {
                                         po.setValueRate(Float.valueOf(tmp.replace("%", "")));
                                     }
                                     try {
@@ -233,9 +233,9 @@ FetchFundTest extends SuperTest {
         List<Fund> fundList = fundMapper.selectList(null);
 
         List<FundBond> fsList = fundBondMapper.selectList(new QueryWrapper<FundBond>().select("code"));
-        if(!CollectionUtils.isEmpty(fsList)){
+        if (!CollectionUtils.isEmpty(fsList)) {
             Set<String> fundCodes = fsList.parallelStream().map(FundBond::getCode).collect(Collectors.toSet());
-            fundList= fundList.stream().filter(f->!fundCodes.contains(f.getCode())).collect(Collectors.toList());
+            fundList = fundList.stream().filter(f -> !fundCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
         // 遍历抓取
@@ -285,9 +285,9 @@ FetchFundTest extends SuperTest {
                                 po.setBondCode(tr.children().get(1).text());
                                 po.setBondName(tr.children().get(2).text());
                                 String tmp = tr.children().get(3).text();
-                                if(tmp.contains("--")){
+                                if (tmp.contains("--")) {
                                     po.setValueRate(0);
-                                }else {
+                                } else {
                                     po.setValueRate(Float.valueOf(tmp.replace("%", "")));
                                 }
 
@@ -325,9 +325,9 @@ FetchFundTest extends SuperTest {
 
         // 过滤已抓取
         List<FundInfo> fiList = fundInfoMapper.selectList(new QueryWrapper<FundInfo>().select("code"));
-        if(!CollectionUtils.isEmpty(fiList)) {
-             List<String> dbCodes = fiList.parallelStream().map(FundInfo::getCode).collect(Collectors.toList());
-             fundList = fundList.parallelStream().filter(f->!dbCodes.contains(f.getCode())).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fiList)) {
+            List<String> dbCodes = fiList.parallelStream().map(FundInfo::getCode).collect(Collectors.toList());
+            fundList = fundList.parallelStream().filter(f -> !dbCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
         for (Fund item : fundList) {
@@ -448,30 +448,30 @@ FetchFundTest extends SuperTest {
                 // 入库：手续费
                 FundFee fundFee = CopyUtils.copy(fee, FundFee.class);
                 FundFee dbFee = fundFeeMapper.selectOne(new QueryWrapper<FundFee>().eq("code", code));
-                if(dbFee!=null){
+                if (dbFee != null) {
                     fundFee.setId(dbFee.getId());
                     rows = fundFeeMapper.updateById(fundFee);
                     log.info("update fee {}", rows);
-                }else{
+                } else {
                     rows = fundFeeMapper.insert(fundFee);
                     log.info("insert fee {}", rows);
                 }
 
                 // 基金概况：投资目标、投资理念、投资范围、投资策略、分红政策
-                Elements boxItems  = html.getElementsByClass("boxitem");
+                Elements boxItems = html.getElementsByClass("boxitem");
                 for (Element ele : boxItems) {
                     String title = ele.selectFirst("h4.t").text();
-                    if(ele.selectFirst("p")!=null){
+                    if (ele.selectFirst("p") != null) {
                         String content = ele.selectFirst("p").text();
-                        if("投资目标".equals(title)){
+                        if ("投资目标".equals(title)) {
                             info.setTarget(content);
-                        }else if ("投资理念".equals(title)){
+                        } else if ("投资理念".equals(title)) {
                             info.setIdea(content);
-                        }else if ("投资范围".equals(title)){
+                        } else if ("投资范围".equals(title)) {
                             info.setScope(content);
-                        }else if ("投资策略".equals(title)){
+                        } else if ("投资策略".equals(title)) {
                             info.setStrategy(content);
-                        }else if ("分红政策".equals(title)){
+                        } else if ("分红政策".equals(title)) {
                             info.setBonus(content);
                         }
                     }
@@ -480,11 +480,11 @@ FetchFundTest extends SuperTest {
                 // 入库：基金概况
                 FundInfo fundInfo = CopyUtils.copy(info, FundInfo.class);
                 FundInfo dbFi = fundInfoMapper.selectOne(new QueryWrapper<FundInfo>().eq("code", code));
-                if(dbFi!=null){
+                if (dbFi != null) {
                     fundInfo.setId(dbFi.getId());
                     rows = fundInfoMapper.updateById(fundInfo);
                     log.info("update info {}", rows);
-                }else{
+                } else {
                     rows = fundInfoMapper.insert(fundInfo);
                     log.info("insert info {}", rows);
                 }
@@ -507,7 +507,7 @@ FetchFundTest extends SuperTest {
         // 遍历抓取
         for (String code : fundCodes) {
             int fvSize = fundValMapper.selectCount(new QueryWrapper<FundVal>().eq("code", code));
-            if(fvSize>0){
+            if (fvSize > 0) {
                 log.info("基金净值已抓取：{} {}", code, fvSize);
                 continue;
             }
@@ -533,6 +533,74 @@ FetchFundTest extends SuperTest {
                             for (JzhItem item : resData.getList()) {
                                 FundJzhPO jzh = new FundJzhPO(code, item);
                                 log.info("净值-{}/{}：{}", pageIndex, pageTotal, JSONUtil.json(jzh));
+                                jzhList.add(jzh);
+                            }
+                            try {
+                                Thread.sleep(Math.min(100, FundConfig.RANDOM.nextInt(1000)));
+                            } catch (InterruptedException e) {
+                                log.error("分页sleep异常：", e);
+                            }
+                        }
+                    } else {
+                        log.error("抓取结果异常：{}, {}, {}", code, pageIndex, resObj.getMsg());
+                        continue;
+                    }
+                } else {
+                    log.error("分页抓取失败：{}, {}", code, pageIndex);
+                }
+            }
+
+            // 入库
+            List<FundVal> fvList = CopyUtils.copy(jzhList, FundVal.class);
+            for (FundVal fv : fvList) {
+                int rows = fundValMapper.insert(fv);
+                log.info("insert fund-val {}", rows);
+            }
+        }
+    }
+
+    @Test
+    public void testJzhAppend() {
+        log.info("测试：历史净值-增量");
+        Unirest.config().addDefaultHeader("Referer", FundConfig.HOST_INFO);
+        Unirest.config().addDefaultHeader("Host", FundConfig.HOST_API);
+
+        // 加载所有基金
+        List<Fund> fundList = fundMapper.selectList(new QueryWrapper<Fund>().select("code"));
+        List<String> fundCodes = fundList.parallelStream().map(Fund::getCode).collect(Collectors.toList());
+
+        // 遍历抓取
+        for (String code : fundCodes) {
+            FundVal latest = fundValMapper.selectOne(new QueryWrapper<FundVal>().eq("code", code).orderByDesc("dt").last("limit 1"));
+
+            // 分页抓取
+            int pageIndex = 1;
+            int pageTotal = 1;
+            String jq = new StringBuilder("jQuery").append(IdWorker.getIdStr()).append("1_")
+                    .append(String.valueOf(System.currentTimeMillis())).toString();
+            List<FundJzhPO> jzhList = new ArrayList<>();
+            outer:
+            for (; pageIndex <= pageTotal; pageIndex++) {
+                String url = MessageFormat.format(FundConfig.FUND_JZ_XHR, jq, code, pageIndex, String.valueOf(System.currentTimeMillis()));
+                HttpResponse<String> res = Unirest.get(url).asString();
+                if (res.isSuccess()) {
+                    String json = FundConfig.pickXhrData(res.getBody());
+                    JzhResponse resObj = JSONObject.parseObject(json, JzhResponse.class);
+                    if (resObj.isSuccess()) {
+                        // 计算总页数
+                        pageTotal = resObj.getPageTotal();
+
+                        JzhData resData = resObj.getData();
+                        if (!CollectionUtils.isEmpty(resData.getList())) {
+                            for (JzhItem item : resData.getList()) {
+                                FundJzhPO jzh = new FundJzhPO(code, item);
+                                log.info("净值-{}/{}：{}", pageIndex, pageTotal, JSONUtil.json(jzh));
+
+                                // 校验时间
+                                if (latest != null && jzh.getDt().equals(latest.getDt())) {
+                                    log.info("增量净值抓取完毕：{} {}", jzh.getDt().toLocaleString(), latest.getDt().toLocaleString());
+                                    break outer;
+                                }
                                 jzhList.add(jzh);
                             }
                             try {
@@ -647,9 +715,9 @@ FetchFundTest extends SuperTest {
 
         // 过滤已抓取
         List<FundManager> fmList = fundManagerMapper.selectList(null);
-        if(!CollectionUtils.isEmpty(fmList)){
+        if (!CollectionUtils.isEmpty(fmList)) {
             Set<String> dbFundCodes = fmList.stream().map(FundManager::getCode).collect(Collectors.toSet());
-            fundList = fundList.stream().filter(f->!dbFundCodes.contains(f.getCode())).collect(Collectors.toList());
+            fundList = fundList.stream().filter(f -> !dbFundCodes.contains(f.getCode())).collect(Collectors.toList());
         }
 
         // 遍历基金
@@ -714,7 +782,7 @@ FetchFundTest extends SuperTest {
 
         // 过滤已抓取
         List<Company> companyList = companyMapper.selectList(null);
-        if(!CollectionUtils.isEmpty(companyList)) {
+        if (!CollectionUtils.isEmpty(companyList)) {
             List<String> dbCmpCodes = companyList.stream().map(Company::getCode).collect(Collectors.toList());
             cmpCodes.removeAll(dbCmpCodes);
         }
@@ -751,9 +819,9 @@ FetchFundTest extends SuperTest {
 
                 // 基金经理人数
                 tmp = trs.get(12).child(1).text();
-                if(tmp.contains("--")){
+                if (tmp.contains("--")) {
                     po.setFundGm(0);
-                }else {
+                } else {
                     po.setFundGm(Float.valueOf(tmp.replace("亿元", "")));
                 }
                 tmp = trs.get(12).child(3).text();
@@ -761,7 +829,7 @@ FetchFundTest extends SuperTest {
                 log.info("基金公司：{}", JSONUtil.json(po));
 
                 // 入库
-                Company cmp = CopyUtils.copy(po,Company.class);
+                Company cmp = CopyUtils.copy(po, Company.class);
                 cmp.setSynTime(now);
                 int rows = companyMapper.insert(cmp);
                 log.info("insert company {}", rows);

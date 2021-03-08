@@ -87,7 +87,31 @@ SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.
 	WHERE (f.name LIKE '%互联%' OR f.name LIKE '%中概%')
  	AND f.setup_date<'2019-1-1' AND f.gm>5
 	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
+-- -----------------------------------------------
+
+# 7，证券公司 
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE (f.name LIKE '%证券%' OR f.name LIKE '%券商%')
+ 	AND f.setup_date<'2019-1-1' AND f.gm>5
+	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
+-- -----------------------------------------------
+
+# 8，军工
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE (f.name LIKE '%军工%')
+ 	AND f.setup_date<'2019-1-1' AND f.gm>5
+	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
 	 
+-- -----------------------------------------------
+
+# 9，科技
+SELECT f.code, f.name, f.type, f.gm, f.company, f.setup_date, ts.track_diff, ts.track_index FROM t_fund f
+	LEFT JOIN t_fund_ts ts ON f.code=ts.code
+	WHERE (f.name LIKE '%恒生%')
+ 	AND f.setup_date<'2019-1-1' AND f.gm>5
+	ORDER BY f.type, f.setup_date ASC, f.gm DESC;
 	
 	
 	
