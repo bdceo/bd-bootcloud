@@ -41,9 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class
-
-FetchFundTest extends SuperTest {
+public class FetchFundTest extends SuperTest {
 
     @Autowired
     private FundMapper fundMapper;
