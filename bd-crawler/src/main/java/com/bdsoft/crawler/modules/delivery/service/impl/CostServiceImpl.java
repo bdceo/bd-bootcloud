@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -88,26 +89,24 @@ public class CostServiceImpl extends ServiceImpl<CostMapper, Cost> implements IC
      * 生成基金净值线数据
      */
     private void genLineVal(FundCostViewVO vo, List<FundVal> valList) {
-        StringBuilder label = new StringBuilder();
-        StringBuilder data = new StringBuilder();
+        List<String> valLabel = new ArrayList<>();
+        List<String> valData = new ArrayList<>();
         for (FundVal v : valList) {
-            label.append("'").append(DateFormatUtils.format(v.getDt(), "yyyy-MM-dd")).append("',");
-            data.append("'").append(v.getUnitVal()).append("',");
+            valData.add(String.format("%.4f", v.getUnitVal()));
+            valLabel.add((DateFormatUtils.format(v.getDt(), "yyyy-MM-dd")));
         }
-        label.replace(label.length() - 1, label.length(), "");
-        data.replace(data.length() - 1, data.length(), "");
         log.info("生成净值线数据");
-        log.info("labels: [{}],", label.toString());
-        log.info("data: [{}],", data.toString());
-        vo.setLineValLabels(label.toString());
-        vo.setLineValData(data.toString());
+        log.info("labels: {},", valLabel);
+        log.info("data: {},", valData);
+        vo.setLineValData(valData);
+        vo.setLineValLabel(valLabel);
     }
 
     /**
      * 生成买入线数据
      */
     private void genLineBuy(FundCostViewVO vo, List<FundVal> valList, List<Delivery> deliveryList) {
-        StringBuilder data = new StringBuilder();
+        List<String> buyData = new ArrayList<>();
         Map<Date, List<Delivery>> doMap = deliveryList.stream().collect(Collectors.groupingBy(Delivery::getDt));
         for (FundVal d : valList) {
             List<Delivery> orders = doMap.get(d.getDt());
@@ -119,40 +118,39 @@ public class CostServiceImpl extends ServiceImpl<CostMapper, Cost> implements IC
                     dealNum += order.getDealNum();
                 }
                 if (dealNum == 0) {
-                    data.append(",");
+                    buyData.add(null);
                 } else {
                     float price = total / dealNum;
-                    data.append("'").append(String.format("%.4f", price)).append("',");
+                    buyData.add(String.format("%.4f", price));
                 }
             } else {
-                data.append(",");
+                buyData.add(null);
             }
         }
-        data.replace(data.length() - 1, data.length(), "");
         log.info("生成买入点位数据");
-        log.info("data: [{}],", data.toString());
-        vo.setLineBuyData(data.toString());
+        log.info("data: {},", buyData);
+        vo.setLineBuyData(buyData);
     }
 
     /**
      * 生成成本线
      */
     private void genLineCost(FundCostViewVO vo, List<FundVal> valList, List<Cost> costList) {
-        StringBuilder data = new StringBuilder();
+        List<String> costData = new ArrayList<>();
         Map<Date, Cost> doMap = costList.stream().collect(Collectors.toMap(Cost::getDt, Function.identity(), (o1, o2) -> o1));
+        String last = "";
         for (FundVal d : valList) {
             Cost cost = doMap.get(d.getDt());
             if (cost != null) {
-                data.append("'").append(String.format("%.4f", cost.getCostPrice())).append("',");
+                last = String.format("%.4f", cost.getCostPrice());
+                costData.add(last);
             } else {
-                data.append(",");
+                costData.add(last);
             }
         }
-        data.replace(data.length() - 1, data.length(), "");
         log.info("生成成本线数据");
-        log.info("data: [{}],", data.toString());
-        vo.setLineCostData(data.toString());
+        log.info("data: {},", costData);
+        vo.setLineCostData(costData);
     }
-
 
 }

@@ -19,7 +19,7 @@ public class DeliveryController {
 
     private final String PAGE_PREFIX = "/delivery/";
 
-    @Resource(name="costServiceImpl")
+    @Resource(name = "costServiceImpl")
     private ICostService costService;
 
     @GetMapping("/cost")
@@ -30,7 +30,8 @@ public class DeliveryController {
 
     @GetMapping("/fund/{code}")
     public ModelAndView fund(@PathVariable("code") String code) {
-        ModelAndView mv = new ModelAndView(PAGE_PREFIX + "fund/" + code);
+        ModelAndView mv = new ModelAndView(PAGE_PREFIX + "fund");
+        mv.addObject("code", code);
         return mv;
     }
 
