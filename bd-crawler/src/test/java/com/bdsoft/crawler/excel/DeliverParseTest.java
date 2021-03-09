@@ -31,7 +31,7 @@ public class DeliverParseTest {
      */
     @Test
     public void testParseHuaTai() {
-        String fileName = "E:\\download\\h5\\华泰交割单.xlsx";
+        String fileName = "E:\\download\\20210309 交割单.xlsx";
         EasyExcel.read(fileName, HuaTaiDeliveryPO.class, new HuaTaiDeliverParser(deliveryService))
                 .registerConverter(new DateConverter())
                 .sheet().doRead();
