@@ -17,7 +17,7 @@ public class SuperTest {
 
     // 全局配置
     static {
-        Unirest.config().connectTimeout(5_000).socketTimeout(10_000)
+        Unirest.config().connectTimeout(10_000).socketTimeout(10_000)
                 .setDefaultHeader("Accept-Encoding", "gzip")
                 .setDefaultHeader("User-Agent", CommonConfig.USER_AGENT);
     }
