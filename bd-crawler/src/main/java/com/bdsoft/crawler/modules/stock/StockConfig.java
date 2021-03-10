@@ -15,6 +15,7 @@ public class StockConfig {
     public static String STOCK_HOLDER_HOST="dcfm.eastmoney.com";
 
     // 十大流通股东：jquery，页码
-    public static String STOCK_HOLDER = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback={0}&st=BDSUM&sr=-1&ps=50&p={1}&token=70f12f2f4f091e459a279469fe49eca5&type=NSCHGSTALA";
+    //public static String STOCK_HOLDER = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback={0}&st=BDSUM&sr=-1&ps=50&p={1}&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&token=70f12f2f4f091e459a279469fe49eca5&type=NSCHGSTALA";
+    public static String STOCK_HOLDER = "http://dcfm.eastmoney.com/em_mutisvcexpandinterface/api/js/get?callback={0}&st=BDSUM&sr=-1&ps=50&p={1}&js=%7Bpages%3A(tp)%2Cdata%3A(x)%7D&token=70f12f2f4f091e459a279469fe49eca5&type=NSCHGSTALA";
     public static String STOCK_INDEX="http://data.eastmoney.com/gdfx/shareholder/{0}.html";
 }

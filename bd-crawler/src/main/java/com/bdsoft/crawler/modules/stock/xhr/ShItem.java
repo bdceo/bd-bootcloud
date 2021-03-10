@@ -3,6 +3,8 @@ package com.bdsoft.crawler.modules.stock.xhr;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 /**
  * 流通股东响应-股东信息
  */
@@ -16,6 +18,6 @@ public class ShItem {
     @JSONField(name = "SHAREHDTYPE")
     private String type;
     @JSONField(name = "LTAG")
-    private Float mvTotal;
+    private BigDecimal mvTotal;
 
 }

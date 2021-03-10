@@ -14,6 +14,6 @@ public class ShResponse {
     @JSONField(name = "pages")
     private int pageTotal;
 
-    @JSONField(name = "Data")
+    @JSONField(name = "data")
     private List<ShItem> data;
 }
